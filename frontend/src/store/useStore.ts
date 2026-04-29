@@ -14,6 +14,7 @@ import {
 import localforage from 'localforage';
 import { BowtieNode, Project, LibraryItem, NodeType } from '../types';
 import { v4 as uuidv4 } from 'uuid';
+import toast from 'react-hot-toast';
 
 localforage.config({
   name: 'BowtieApp',
@@ -307,7 +308,7 @@ export const useStore = create<AppState>((set, get) => ({
       }
     } catch (error) {
       console.error("Failed to parse JSON file", error);
-      alert("Invalid JSON file");
+      toast.error("無效的 JSON 檔案或格式錯誤");
     }
   }
 }));

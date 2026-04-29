@@ -9,7 +9,7 @@ import { ReactFlowProvider } from '@xyflow/react';
 import { Toaster } from 'react-hot-toast';
 
 function App() {
-  const { loadData, isLoading, activeProjectId } = useStore();
+  const { loadData, isLoading, activeProjectId, isSidebarOpen, isPropertiesPanelOpen } = useStore();
 
   useEffect(() => {
     loadData();
@@ -26,11 +26,11 @@ function App() {
         <Topbar />
         {activeProjectId ? (
           <div className="flex flex-row flex-grow h-[calc(100vh-56px)]">
-            <Sidebar />
+            {isSidebarOpen && <Sidebar />}
             <main className="flex-grow h-full relative">
               <BowtieEditor />
             </main>
-            <PropertiesPanel />
+            {isPropertiesPanelOpen && <PropertiesPanel />}
           </div>
         ) : (
           <Dashboard />

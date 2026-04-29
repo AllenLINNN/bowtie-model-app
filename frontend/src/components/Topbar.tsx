@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { useStore } from '../store/useStore';
 import { format } from 'date-fns';
-import { Download, Upload, Image, FileText, WifiOff, ArrowLeft, Edit2, LayoutTemplate } from 'lucide-react';
+import { Download, Image, FileText, WifiOff, ArrowLeft, Edit2, LayoutTemplate, PanelLeftClose, PanelLeft, PanelRightClose, PanelRight, FileUp } from 'lucide-react';
 import { toPng } from 'html-to-image';
 import jsPDF from 'jspdf';
 import { useReactFlow, getNodesBounds, getViewportForBounds } from '@xyflow/react';
@@ -9,7 +9,7 @@ import { getLayoutedElements } from '../utils/layout';
 import toast from 'react-hot-toast';
 
 const Topbar = () => {
-  const { exportJSON, importJSON, activeProjectId, projects, openProject, updateProjectName, nodes, edges, setNodes, setEdges } = useStore();
+  const { exportJSON, importJSON, activeProjectId, projects, openProject, updateProjectName, nodes, edges, setNodes, setEdges, isSidebarOpen, isPropertiesPanelOpen, toggleSidebar, togglePropertiesPanel } = useStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const reactFlowInstance = useReactFlow();
 
@@ -142,13 +142,22 @@ const Topbar = () => {
     <header className="h-14 bg-white border-b border-gray-200 px-4 flex items-center justify-between shrink-0 shadow-sm z-10">
       <div className="flex items-center gap-4">
         {activeProjectId ? (
-          <button 
-            onClick={() => openProject(null)} 
-            className="flex items-center gap-1 text-gray-500 hover:text-gray-800 transition-colors mr-2"
-            title="返回專案列表"
-          >
-            <ArrowLeft size={18} />
-          </button>
+          <div className="flex items-center gap-2 mr-2">
+            <button 
+              onClick={() => openProject(null)} 
+              className="flex items-center text-gray-500 hover:text-gray-800 transition-colors"
+              title="返回專案列表"
+            >
+              <ArrowLeft size={20} />
+            </button>
+            <button 
+              onClick={toggleSidebar} 
+              className="flex items-center text-gray-400 hover:text-blue-600 transition-colors"
+              title={isSidebarOpen ? "收起左側面板" : "展開左側面板"}
+            >
+              {isSidebarOpen ? <PanelLeftClose size={20} /> : <PanelLeft size={20} />}
+            </button>
+          </div>
         ) : null}
         
         {isEditingName ? (
@@ -194,18 +203,18 @@ const Topbar = () => {
             onChange={handleFileChange} 
           />
           <button onClick={handleImportClick} className="btn-action" title="匯入工作區">
-            <Download size={16} /> <span className="text-sm">匯入 JSON</span>
+            <FileUp size={16} /> <span className="text-sm">匯入工作區 JSON</span>
           </button>
           
-          <button onClick={() => { exportJSON(); toast.success('工作區已匯出'); }} className="btn-action" title="匯出工作區">
-            <Upload size={16} /> <span className="text-sm">匯出 JSON</span>
+          <button onClick={() => { exportJSON(); toast.success('工作區已下載'); }} className="btn-action" title="下載工作區">
+            <Download size={16} /> <span className="text-sm">下載工作區 JSON</span>
           </button>
           
           {activeProjectId && (
             <>
               <div className="w-px h-6 bg-gray-300 mx-1"></div>
               <button onClick={handleAutoLayout} className="btn-action" title="自動整理節點排列">
-                <LayoutTemplate size={16} /> <span className="text-sm">自動排版</span>
+                <LayoutTemplate size={16} /> <span className="text-sm hidden lg:inline">自動排版</span>
               </button>
               <div className="w-px h-6 bg-gray-300 mx-1"></div>
               <button onClick={exportPNG} className="btn-action" title="匯出為圖片">
@@ -213,6 +222,14 @@ const Topbar = () => {
               </button>
               <button onClick={exportPDF} className="btn-action" title="匯出為PDF">
                 <FileText size={16} /> <span className="text-sm">PDF</span>
+              </button>
+              <div className="w-px h-6 bg-gray-300 mx-1"></div>
+              <button 
+                onClick={togglePropertiesPanel} 
+                className={`flex items-center p-1.5 rounded transition-colors ${isPropertiesPanelOpen ? 'text-blue-600 bg-blue-50 hover:bg-blue-100' : 'text-gray-400 hover:text-blue-600 hover:bg-gray-100'}`}
+                title={isPropertiesPanelOpen ? "收起右側屬性面板" : "展開右側屬性面板"}
+              >
+                {isPropertiesPanelOpen ? <PanelRightClose size={20} /> : <PanelRight size={20} />}
               </button>
             </>
           )}
