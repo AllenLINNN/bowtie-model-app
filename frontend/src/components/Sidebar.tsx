@@ -58,7 +58,7 @@ const Sidebar = () => {
             {nodeTypes.map((nt) => (
               <div
                 key={nt.type}
-                className={`p-3 rounded border-2 shadow-sm cursor-grab text-center font-medium text-sm ${nt.colorClass} hover:opacity-90`}
+                className={`p-3 rounded border border-gray-200 border-l-4 shadow-sm cursor-grab text-left font-medium text-sm transition-shadow hover:shadow-md ${nt.colorClass}`}
                 onDragStart={(event) => onDragStartTemplate(event, nt.type, nt.label)}
                 draggable
               >
@@ -87,17 +87,21 @@ const Sidebar = () => {
                   {items.map((item) => (
                     <div key={item.id} className="relative group">
                       <div
-                        className={`p-3 pr-8 rounded border-2 shadow-sm cursor-grab font-medium text-sm text-left transition-colors ${nt.colorClass} ${selectedLibraryItemId === item.id ? 'ring-4 ring-blue-400 ring-offset-1' : ''}`}
+                        className={`p-3 pr-8 rounded border border-gray-200 border-l-4 shadow-sm cursor-grab font-medium text-sm text-left transition-all ${nt.colorClass} ${selectedLibraryItemId === item.id ? 'ring-2 ring-blue-400 ring-offset-1' : 'hover:shadow-md'}`}
                         onDragStart={(event) => onDragStartLibrary(event, item.id)}
                         onClick={() => setSelectedLibraryItemId(item.id)}
                         draggable
                       >
-                        <div className="text-[10px] opacity-75 font-mono mb-1">{item.entityData?.code || '尚未編號'}</div>
+                        <div className="mb-1.5">
+                          <span className="inline-block bg-white/80 border border-current/20 rounded px-1.5 py-0.5 text-[10px] font-mono opacity-80">
+                            {item.entityData?.code || '尚未編號'}
+                          </span>
+                        </div>
                         <div className="truncate">{item.label}</div>
                       </div>
                       <button 
                         onClick={(e) => handleRemove(item.id, e)}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-white/70 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 rounded p-1 shadow-sm"
                         title="從資料庫刪除"
                       >
                         <Trash2 size={14} />

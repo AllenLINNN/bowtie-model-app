@@ -3,13 +3,13 @@ import { Handle, Position } from '@xyflow/react';
 import { DiagramNodeData } from '../types';
 import { useStore } from '../store/useStore';
 
-const colorMap: Record<string, { bg: string, borderL: string, text: string }> = {
-  hazard: { bg: 'bg-slate-50', borderL: 'border-l-blue-700', text: 'text-slate-800' },
-  top_event: { bg: 'bg-red-50', borderL: 'border-l-red-600', text: 'text-slate-800' },
-  threat: { bg: 'bg-blue-50', borderL: 'border-l-blue-500', text: 'text-slate-700' },
-  consequence: { bg: 'bg-orange-50', borderL: 'border-l-orange-500', text: 'text-slate-700' },
-  preventive_barrier: { bg: 'bg-emerald-50', borderL: 'border-l-emerald-500', text: 'text-slate-700' },
-  mitigative_barrier: { bg: 'bg-purple-50', borderL: 'border-l-purple-500', text: 'text-slate-700' },
+const colorMap: Record<string, { bg: string, borderL: string, text: string, title: string }> = {
+  hazard: { bg: 'bg-slate-50', borderL: 'border-l-blue-700', text: 'text-slate-800', title: '危害 (Hazard)' },
+  top_event: { bg: 'bg-red-50', borderL: 'border-l-red-600', text: 'text-slate-800', title: '頂端事件 (Top Event)' },
+  threat: { bg: 'bg-blue-50', borderL: 'border-l-blue-500', text: 'text-slate-700', title: '威脅 (Threat)' },
+  consequence: { bg: 'bg-orange-50', borderL: 'border-l-orange-500', text: 'text-slate-700', title: '後果 (Consequence)' },
+  preventive_barrier: { bg: 'bg-emerald-50', borderL: 'border-l-emerald-500', text: 'text-slate-700', title: '預防屏障 (Prev. Barrier)' },
+  mitigative_barrier: { bg: 'bg-purple-50', borderL: 'border-l-purple-500', text: 'text-slate-700', title: '減緩屏障 (Mitig. Barrier)' },
 };
 
 const CustomNode = ({ id, data, selected }: { id: string, data: DiagramNodeData, selected?: boolean }) => {
