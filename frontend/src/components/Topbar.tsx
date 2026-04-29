@@ -75,6 +75,7 @@ const Topbar = () => {
       backgroundColor: '#f3f4f6',
       width: width,
       height: height,
+      pixelRatio: 3, // Boost resolution by 3x for crisp output
       style: {
         width: `${width}px`,
         height: `${height}px`,
