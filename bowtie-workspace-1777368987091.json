@@ -1,0 +1,571 @@
+{
+  "projects": [
+    {
+      "id": "c6a792a5-ce21-4b32-9ff1-19c7a18500a3",
+      "name": "挖斷電纜test",
+      "created_at": 1777367356265,
+      "last_modified": 1777368984897,
+      "nodes": [
+        {
+          "id": "3a7a857d-b64c-4791-bff5-a8bec6a56018",
+          "type": "custom",
+          "position": {
+            "x": 667.2759720156749,
+            "y": 186.7956846353648
+          },
+          "data": {
+            "label": "臨軌開挖作業區內之既有地下電纜/管線",
+            "type": "hazard",
+            "entityId": "de2dd8d5-f2d2-499c-9dbc-49bd1f7efdcc",
+            "entityData": {
+              "code": "H-002"
+            }
+          },
+          "measured": {
+            "width": 280,
+            "height": 95
+          },
+          "selected": false,
+          "dragging": false
+        },
+        {
+          "id": "76cd824c-40c1-41a0-8f12-28961bab4536",
+          "type": "custom",
+          "position": {
+            "x": 697.2556305941819,
+            "y": 467.0921398350271
+          },
+          "data": {
+            "label": "挖斷的電纜導致臺鐵號誌損壞",
+            "type": "top_event",
+            "entityId": "a35a609a-9b45-45b3-8d1a-72376dade8fc",
+            "entityData": {
+              "code": "E-001"
+            }
+          },
+          "measured": {
+            "width": 218,
+            "height": 95
+          },
+          "selected": false,
+          "dragging": false
+        },
+        {
+          "id": "7a86167d-7957-44b9-b88c-2cac1761cb7e",
+          "type": "custom",
+          "position": {
+            "x": 1086.1661255269382,
+            "y": 208.87557099463749
+          },
+          "data": {
+            "label": "冒進號誌",
+            "type": "consequence",
+            "entityId": "7ed19599-972e-46ff-aa1c-0e16c422ba36",
+            "entityData": {
+              "code": "C-001"
+            }
+          },
+          "measured": {
+            "width": 150,
+            "height": 95
+          },
+          "selected": false,
+          "dragging": false
+        },
+        {
+          "id": "bc84d746-bf3d-4829-9a2c-09bbe60656f9",
+          "type": "custom",
+          "position": {
+            "x": 1082.1661255269382,
+            "y": 412.9094012935677
+          },
+          "data": {
+            "label": "號誌損壞致列車衝撞",
+            "type": "consequence",
+            "entityId": "007c48e3-f226-4c05-85ed-5ae15854784f",
+            "entityData": {
+              "code": "C-002"
+            }
+          },
+          "measured": {
+            "width": 162,
+            "height": 95
+          },
+          "selected": false,
+          "dragging": false
+        },
+        {
+          "id": "29e5d65f-b650-44d0-940d-ec4da44afa79",
+          "type": "custom",
+          "position": {
+            "x": -351.7668089945061,
+            "y": 350.6890533768178
+          },
+          "data": {
+            "label": "挖土機清除掘除時不慎",
+            "type": "threat",
+            "entityId": "8f789854-92eb-4f1d-9b5d-25fdf03f32b0",
+            "entityData": {
+              "code": "T-006"
+            }
+          },
+          "measured": {
+            "width": 176,
+            "height": 95
+          },
+          "selected": false,
+          "dragging": false
+        },
+        {
+          "id": "242e707b-32de-4cdd-af36-f703467e6d62",
+          "type": "custom",
+          "position": {
+            "x": 5.3310179821851875,
+            "y": 526.9629442121876
+          },
+          "data": {
+            "label": "挖土機操作人員精神不濟",
+            "type": "threat",
+            "entityId": "02ee0a4c-c534-4f98-ba6b-b4a2462a456d",
+            "entityData": {
+              "code": "T-007"
+            }
+          },
+          "measured": {
+            "width": 190,
+            "height": 95
+          },
+          "selected": false,
+          "dragging": false
+        },
+        {
+          "id": "8333be3e-5d4b-49ec-84ea-2e6646cd1ef9",
+          "type": "custom",
+          "position": {
+            "x": 7.774544935232541,
+            "y": 701.6917665283315
+          },
+          "data": {
+            "label": "施工前未調查既有線纜情況",
+            "type": "threat",
+            "entityId": "9f1aa39f-6c93-4603-a993-818bde09f207",
+            "entityData": {
+              "code": "T-008"
+            }
+          },
+          "measured": {
+            "width": 204,
+            "height": 95
+          },
+          "selected": false,
+          "dragging": false
+        },
+        {
+          "id": "6ded5ddb-2d95-4509-9fd6-8501cf420d56",
+          "type": "custom",
+          "position": {
+            "x": -123.88810872285711,
+            "y": 350.9764132909622
+          },
+          "data": {
+            "label": "挖掘前檢查是否有圈圍警示",
+            "type": "preventive_barrier",
+            "entityId": "4602d9aa-6f36-4eef-bb27-fca0a07ebe25",
+            "entityData": {
+              "code": "PB-001",
+              "effectiveness": "poor"
+            }
+          },
+          "measured": {
+            "width": 204,
+            "height": 95
+          },
+          "selected": false,
+          "dragging": false
+        },
+        {
+          "id": "1ed53d67-2067-41c6-bd54-ca507e1882d0",
+          "type": "custom",
+          "position": {
+            "x": 124.47249444562914,
+            "y": 350.79681334462214
+          },
+          "data": {
+            "label": "作業主管在場監督",
+            "type": "preventive_barrier",
+            "entityId": "37659aa1-86aa-4a43-adcd-c6475e3e2d37",
+            "entityData": {
+              "code": "PB-002"
+            }
+          },
+          "measured": {
+            "width": 150,
+            "height": 95
+          },
+          "selected": false,
+          "dragging": false
+        },
+        {
+          "id": "b4852895-1958-41bf-bbf7-f695788aad31",
+          "type": "custom",
+          "position": {
+            "x": 360.0086945456185,
+            "y": 696.7231996613526
+          },
+          "data": {
+            "label": "施工前辦理會勘以警示帶圈圍",
+            "type": "preventive_barrier",
+            "entityId": "d305775b-3533-472e-aed2-ed4d58390090",
+            "entityData": {
+              "code": "PB-005"
+            }
+          },
+          "measured": {
+            "width": 218,
+            "height": 95
+          },
+          "selected": false,
+          "dragging": false
+        },
+        {
+          "id": "352cc0df-1f3a-43d3-91f5-719526b15ee8",
+          "type": "custom",
+          "position": {
+            "x": 313.8131145513039,
+            "y": 348.64086308713377
+          },
+          "data": {
+            "label": "鄰近臺鐵設備開挖深度小於120cm改人工施作",
+            "type": "preventive_barrier",
+            "entityId": "bf9e190a-c4ca-402e-9b0c-cabebbef99da",
+            "entityData": {
+              "code": "PB-003"
+            }
+          },
+          "measured": {
+            "width": 319,
+            "height": 95
+          },
+          "selected": false,
+          "dragging": false
+        },
+        {
+          "id": "388f9468-c8e4-495b-9eba-5353e3592904",
+          "type": "custom",
+          "position": {
+            "x": 349.0401276786393,
+            "y": 520.3529282466152
+          },
+          "data": {
+            "label": "勤前健康檢查與觀察",
+            "type": "preventive_barrier",
+            "entityId": "5908b1e2-dec6-47b4-8416-6d9dccebb872",
+            "entityData": {
+              "code": "PB-004"
+            }
+          },
+          "measured": {
+            "width": 162,
+            "height": 95
+          },
+          "selected": false,
+          "dragging": false
+        },
+        {
+          "id": "34d9495b-6541-4ffe-a885-3abb0bb36ae9",
+          "type": "custom",
+          "position": {
+            "x": 1036.833325144724,
+            "y": 570.1625147351242
+          },
+          "data": {
+            "label": "臨軌施工導致臺鐵設備損壞",
+            "type": "consequence",
+            "entityId": "a46c713a-dd43-4914-a16b-c3e0c81b61fe",
+            "entityData": {
+              "code": "C-003"
+            }
+          },
+          "measured": {
+            "width": 204,
+            "height": 95
+          },
+          "selected": false,
+          "dragging": false
+        },
+        {
+          "id": "9bb254a5-00d2-4d96-8cf9-a8d1afe30488",
+          "type": "custom",
+          "position": {
+            "x": 1074.992497529805,
+            "y": 741.1728259322156
+          },
+          "data": {
+            "label": "臨軌施工導致臺鐵誤點",
+            "type": "consequence",
+            "entityId": "dc63cfb9-eb4c-4077-8ecc-a5a5108d9720",
+            "entityData": {
+              "code": "C-004"
+            }
+          },
+          "measured": {
+            "width": 176,
+            "height": 95
+          },
+          "selected": false,
+          "dragging": false
+        }
+      ],
+      "edges": [
+        {
+          "style": {
+            "stroke": "#9ca3af",
+            "strokeWidth": 2
+          },
+          "source": "3a7a857d-b64c-4791-bff5-a8bec6a56018",
+          "sourceHandle": "bottom",
+          "target": "76cd824c-40c1-41a0-8f12-28961bab4536",
+          "targetHandle": "top",
+          "id": "xy-edge__3a7a857d-b64c-4791-bff5-a8bec6a56018bottom-76cd824c-40c1-41a0-8f12-28961bab4536top"
+        },
+        {
+          "style": {
+            "stroke": "#9ca3af",
+            "strokeWidth": 2
+          },
+          "source": "76cd824c-40c1-41a0-8f12-28961bab4536",
+          "target": "7a86167d-7957-44b9-b88c-2cac1761cb7e",
+          "id": "xy-edge__76cd824c-40c1-41a0-8f12-28961bab4536-7a86167d-7957-44b9-b88c-2cac1761cb7e"
+        },
+        {
+          "style": {
+            "stroke": "#9ca3af",
+            "strokeWidth": 2
+          },
+          "source": "76cd824c-40c1-41a0-8f12-28961bab4536",
+          "target": "bc84d746-bf3d-4829-9a2c-09bbe60656f9",
+          "id": "xy-edge__76cd824c-40c1-41a0-8f12-28961bab4536-bc84d746-bf3d-4829-9a2c-09bbe60656f9"
+        },
+        {
+          "style": {
+            "stroke": "#9ca3af",
+            "strokeWidth": 2
+          },
+          "source": "29e5d65f-b650-44d0-940d-ec4da44afa79",
+          "target": "6ded5ddb-2d95-4509-9fd6-8501cf420d56",
+          "id": "xy-edge__29e5d65f-b650-44d0-940d-ec4da44afa79-6ded5ddb-2d95-4509-9fd6-8501cf420d56"
+        },
+        {
+          "style": {
+            "stroke": "#9ca3af",
+            "strokeWidth": 2
+          },
+          "source": "6ded5ddb-2d95-4509-9fd6-8501cf420d56",
+          "target": "1ed53d67-2067-41c6-bd54-ca507e1882d0",
+          "id": "xy-edge__6ded5ddb-2d95-4509-9fd6-8501cf420d56-1ed53d67-2067-41c6-bd54-ca507e1882d0"
+        },
+        {
+          "style": {
+            "stroke": "#9ca3af",
+            "strokeWidth": 2
+          },
+          "source": "242e707b-32de-4cdd-af36-f703467e6d62",
+          "target": "388f9468-c8e4-495b-9eba-5353e3592904",
+          "id": "xy-edge__242e707b-32de-4cdd-af36-f703467e6d62-388f9468-c8e4-495b-9eba-5353e3592904"
+        },
+        {
+          "style": {
+            "stroke": "#9ca3af",
+            "strokeWidth": 2
+          },
+          "source": "1ed53d67-2067-41c6-bd54-ca507e1882d0",
+          "target": "352cc0df-1f3a-43d3-91f5-719526b15ee8",
+          "id": "xy-edge__1ed53d67-2067-41c6-bd54-ca507e1882d0-352cc0df-1f3a-43d3-91f5-719526b15ee8"
+        },
+        {
+          "style": {
+            "stroke": "#9ca3af",
+            "strokeWidth": 2
+          },
+          "source": "352cc0df-1f3a-43d3-91f5-719526b15ee8",
+          "target": "76cd824c-40c1-41a0-8f12-28961bab4536",
+          "id": "xy-edge__352cc0df-1f3a-43d3-91f5-719526b15ee8-76cd824c-40c1-41a0-8f12-28961bab4536"
+        },
+        {
+          "style": {
+            "stroke": "#9ca3af",
+            "strokeWidth": 2
+          },
+          "source": "388f9468-c8e4-495b-9eba-5353e3592904",
+          "target": "76cd824c-40c1-41a0-8f12-28961bab4536",
+          "id": "xy-edge__388f9468-c8e4-495b-9eba-5353e3592904-76cd824c-40c1-41a0-8f12-28961bab4536"
+        },
+        {
+          "style": {
+            "stroke": "#9ca3af",
+            "strokeWidth": 2
+          },
+          "source": "8333be3e-5d4b-49ec-84ea-2e6646cd1ef9",
+          "target": "b4852895-1958-41bf-bbf7-f695788aad31",
+          "id": "xy-edge__8333be3e-5d4b-49ec-84ea-2e6646cd1ef9-b4852895-1958-41bf-bbf7-f695788aad31"
+        },
+        {
+          "style": {
+            "stroke": "#9ca3af",
+            "strokeWidth": 2
+          },
+          "source": "b4852895-1958-41bf-bbf7-f695788aad31",
+          "target": "76cd824c-40c1-41a0-8f12-28961bab4536",
+          "id": "xy-edge__b4852895-1958-41bf-bbf7-f695788aad31-76cd824c-40c1-41a0-8f12-28961bab4536"
+        },
+        {
+          "style": {
+            "stroke": "#9ca3af",
+            "strokeWidth": 2
+          },
+          "source": "76cd824c-40c1-41a0-8f12-28961bab4536",
+          "target": "34d9495b-6541-4ffe-a885-3abb0bb36ae9",
+          "id": "xy-edge__76cd824c-40c1-41a0-8f12-28961bab4536-34d9495b-6541-4ffe-a885-3abb0bb36ae9"
+        },
+        {
+          "style": {
+            "stroke": "#9ca3af",
+            "strokeWidth": 2
+          },
+          "source": "76cd824c-40c1-41a0-8f12-28961bab4536",
+          "target": "9bb254a5-00d2-4d96-8cf9-a8d1afe30488",
+          "id": "xy-edge__76cd824c-40c1-41a0-8f12-28961bab4536-9bb254a5-00d2-4d96-8cf9-a8d1afe30488"
+        }
+      ]
+    }
+  ],
+  "library": [
+    {
+      "type": "hazard",
+      "label": "清除掘除時挖斷電纜",
+      "entityData": {
+        "code": "H-002"
+      },
+      "id": "7b24fda6-e54b-45a2-a73e-d8bcad5fb7f9",
+      "created_at": 1777367712375
+    },
+    {
+      "type": "consequence",
+      "label": "冒進號誌",
+      "entityData": {
+        "code": "C-001"
+      },
+      "id": "30a10005-a325-4f91-a331-6f89db331626",
+      "created_at": 1777367830695
+    },
+    {
+      "type": "top_event",
+      "label": "挖斷的電纜導致臺鐵號誌損壞",
+      "entityData": {
+        "code": "E-001"
+      },
+      "id": "60281f9d-b5df-4994-bb2a-3a5d80905e09",
+      "created_at": 1777367835639
+    },
+    {
+      "type": "threat",
+      "label": "挖土機清除掘除時不慎",
+      "entityData": {
+        "code": "T-006"
+      },
+      "id": "61bc3ac2-78f2-4222-841f-d718afe79974",
+      "created_at": 1777367872417
+    },
+    {
+      "type": "consequence",
+      "label": "號誌損壞致列車衝撞",
+      "entityData": {
+        "code": "C-002"
+      },
+      "id": "1695b3be-4d07-491a-b7aa-5287d5e4cefd",
+      "created_at": 1777367889412
+    },
+    {
+      "type": "threat",
+      "label": "挖土機操作人員精神不濟",
+      "entityData": {
+        "code": "T-007"
+      },
+      "id": "9d2f050b-5b67-48b4-a050-3e54541f187c",
+      "created_at": 1777367929110
+    },
+    {
+      "type": "threat",
+      "label": "施工前未調查既有線纜情況",
+      "entityData": {
+        "code": "T-008"
+      },
+      "id": "36de068f-9355-4d88-98e1-4594c6010089",
+      "created_at": 1777367971385
+    },
+    {
+      "type": "consequence",
+      "label": "臨軌施工導致臺鐵設備損壞",
+      "entityData": {
+        "code": "C-003"
+      },
+      "id": "a291a6e2-229a-4301-b13f-864d0d185140",
+      "created_at": 1777368448658
+    },
+    {
+      "type": "preventive_barrier",
+      "label": "作業主管在場監督",
+      "entityData": {
+        "code": "PB-002"
+      },
+      "id": "5c56b53a-46f2-44ba-b996-36d04982a0a1",
+      "created_at": 1777368462233
+    },
+    {
+      "type": "preventive_barrier",
+      "label": "挖掘前檢查是否有圈圍警示",
+      "entityData": {
+        "code": "PB-001",
+        "effectiveness": "poor"
+      },
+      "id": "7eff1c68-5562-47cb-b048-65c19e8ccc36",
+      "created_at": 1777368464418
+    },
+    {
+      "type": "preventive_barrier",
+      "label": "鄰近臺鐵設備開挖深度小於120cm改人工施作",
+      "entityData": {
+        "code": "PB-003"
+      },
+      "id": "17b4b65b-c6f4-4465-bfcf-114ad6d84846",
+      "created_at": 1777368491012
+    },
+    {
+      "type": "preventive_barrier",
+      "label": "勤前健康檢查與觀察",
+      "entityData": {
+        "code": "PB-004"
+      },
+      "id": "4d69a664-de55-47f2-8a7a-40812836589e",
+      "created_at": 1777368493541
+    },
+    {
+      "type": "preventive_barrier",
+      "label": "施工前辦理會勘以警示帶圈圍",
+      "entityData": {
+        "code": "PB-005"
+      },
+      "id": "3f8b476d-42f7-4ca2-8445-6009c5456017",
+      "created_at": 1777368496099
+    },
+    {
+      "type": "consequence",
+      "label": "臨軌施工導致臺鐵誤點",
+      "entityData": {
+        "code": "C-004"
+      },
+      "id": "38705e89-3eb5-4ee9-8ade-789a42bcaa84",
+      "created_at": 1777368558046
+    }
+  ]
+}
