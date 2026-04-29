@@ -88,6 +88,10 @@ const CustomNode = ({ id, data, selected }: { id: string, data: DiagramNodeData,
         </div>
       )}
       
+      <div className="text-[10px] text-gray-500 mt-2 pt-1.5 border-t border-gray-200/60 font-normal">
+        {colors.title}
+      </div>
+      
       {showRightHandle && <Handle type="source" position={Position.Right} className="w-3 h-3" />}
       {showBottomHandle && <Handle type="source" position={Position.Bottom} className="w-3 h-3" id="bottom" />}
     </div>
