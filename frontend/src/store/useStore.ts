@@ -44,6 +44,8 @@ interface AppState {
   createProject: (name: string, description?: string) => void;
   openProject: (id: string | null) => void;
   deleteProject: (id: string) => void;
+  restoreProject: (id: string) => void;
+  permanentlyDeleteProject: (id: string) => void;
   updateProjectName: (name: string) => void;
 
   // Editor Actions

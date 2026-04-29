@@ -113,7 +113,7 @@ const Editor = () => {
     );
 
     if (!isValid) {
-      alert(`Invalid connection: Cannot connect ${sType.replace('_', ' ')} to ${tType.replace('_', ' ')}`);
+      toast.error(`無效的連線：無法將 ${sType.replace('_', ' ')} 連接到 ${tType.replace('_', ' ')}`);
     }
 
     return isValid;
