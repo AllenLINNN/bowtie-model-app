@@ -29,6 +29,12 @@ interface AppState {
   activeProjectId: string | null;
   isLoading: boolean;
 
+  // UI State
+  isSidebarOpen: boolean;
+  isPropertiesPanelOpen: boolean;
+  toggleSidebar: () => void;
+  togglePropertiesPanel: () => void;
+
   // Active Project State (mirrors the active project's nodes/edges for React Flow)
   nodes: BowtieNode[];
   edges: Edge[];
@@ -74,6 +80,10 @@ export const useStore = create<AppState>((set, get) => ({
   selectedLibraryItemId: null,
   setSelectedLibraryItemId: (id) => set({ selectedLibraryItemId: id }),
   isLoading: true,
+  isSidebarOpen: true,
+  isPropertiesPanelOpen: true,
+  toggleSidebar: () => set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
+  togglePropertiesPanel: () => set((state) => ({ isPropertiesPanelOpen: !state.isPropertiesPanelOpen })),
   nodes: [],
   edges: [],
 
