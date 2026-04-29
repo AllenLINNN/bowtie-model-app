@@ -19,6 +19,8 @@ const Dashboard = () => {
       createProject(newProjectName.trim());
       toast.success(`成功建立專案：${newProjectName.trim()}`);
       setNewProjectName('');
+    } else {
+      toast.error('請輸入專案名稱！');
     }
   };
 
