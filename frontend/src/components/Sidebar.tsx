@@ -26,12 +26,12 @@ const Sidebar = () => {
   };
 
   const nodeTypes: { type: NodeType; label: string; colorClass: string }[] = [
-    { type: 'hazard', label: '危害 (Hazard)', colorClass: 'bg-slate-50 border-l-blue-700 text-slate-800' },
-    { type: 'top_event', label: '頂端事件 (Top Event)', colorClass: 'bg-red-50 border-l-red-600 text-slate-800' },
-    { type: 'threat', label: '威脅 (Threat)', colorClass: 'bg-blue-50 border-l-blue-500 text-slate-700' },
-    { type: 'preventive_barrier', label: '預防性屏障 (Preventive)', colorClass: 'bg-emerald-50 border-l-emerald-500 text-slate-700' },
-    { type: 'mitigative_barrier', label: '減緩性屏障 (Mitigative)', colorClass: 'bg-purple-50 border-l-purple-500 text-slate-700' },
-    { type: 'consequence', label: '後果 (Consequence)', colorClass: 'bg-orange-50 border-l-orange-500 text-slate-700' },
+    { type: 'hazard', label: '危害 (Hazard)', colorClass: 'bg-blue-700 text-white' },
+    { type: 'top_event', label: '頂端事件 (Top Event)', colorClass: 'bg-red-600 text-white' },
+    { type: 'threat', label: '威脅 (Threat)', colorClass: 'bg-blue-500 text-white' },
+    { type: 'preventive_barrier', label: '預防性屏障 (Preventive)', colorClass: 'bg-emerald-500 text-white' },
+    { type: 'mitigative_barrier', label: '減緩性屏障 (Mitigative)', colorClass: 'bg-purple-500 text-white' },
+    { type: 'consequence', label: '後果 (Consequence)', colorClass: 'bg-orange-500 text-white' },
   ];
 
   return (
@@ -58,7 +58,7 @@ const Sidebar = () => {
             {nodeTypes.map((nt) => (
               <div
                 key={nt.type}
-                className={`p-3 rounded border border-gray-200 border-l-4 shadow-sm cursor-grab text-left font-medium text-sm transition-shadow hover:shadow-md ${nt.colorClass}`}
+                className={`p-3 rounded shadow-sm cursor-grab text-center font-medium text-sm transition-shadow hover:shadow-md ${nt.colorClass}`}
                 onDragStart={(event) => onDragStartTemplate(event, nt.type, nt.label)}
                 draggable
               >
@@ -87,7 +87,7 @@ const Sidebar = () => {
                   {items.map((item) => (
                     <div key={item.id} className="relative group">
                       <div
-                        className={`p-3 pr-8 rounded border border-gray-200 border-l-4 shadow-sm cursor-grab font-medium text-sm text-left transition-all ${nt.colorClass} ${selectedLibraryItemId === item.id ? 'ring-2 ring-blue-400 ring-offset-1' : 'hover:shadow-md'}`}
+                        className={`p-3 pr-8 rounded shadow-sm cursor-grab font-medium text-sm text-left transition-all ${nt.colorClass} ${selectedLibraryItemId === item.id ? 'ring-2 ring-blue-400 ring-offset-1' : 'hover:shadow-md'}`}
                         onDragStart={(event) => onDragStartLibrary(event, item.id)}
                         onClick={() => setSelectedLibraryItemId(item.id)}
                         draggable
