@@ -172,10 +172,24 @@ export const useStore = create<AppState>((set, get) => ({
 
   deleteProject: (id) => {
     set((state) => ({
-      projects: state.projects.filter(p => p.id !== id),
+      projects: state.projects.map(p => p.id === id ? { ...p, archived: true } : p),
       activeProjectId: state.activeProjectId === id ? null : state.activeProjectId,
       nodes: state.activeProjectId === id ? [] : state.nodes,
       edges: state.activeProjectId === id ? [] : state.edges,
+    }));
+    get().saveData();
+  },
+
+  restoreProject: (id) => {
+    set((state) => ({
+      projects: state.projects.map(p => p.id === id ? { ...p, archived: false } : p)
+    }));
+    get().saveData();
+  },
+
+  permanentlyDeleteProject: (id) => {
+    set((state) => ({
+      projects: state.projects.filter(p => p.id !== id)
     }));
     get().saveData();
   },

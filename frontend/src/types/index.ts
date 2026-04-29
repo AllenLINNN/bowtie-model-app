@@ -47,4 +47,5 @@ export interface Project {
   last_modified: number;
   nodes: BowtieNode[];
   edges: Edge[];
+  archived?: boolean;
 }

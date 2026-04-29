@@ -13,6 +13,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { useStore } from '../store/useStore';
 import CustomNode from './CustomNode';
 import { NodeType } from '../types';
+import toast from 'react-hot-toast';
 
 const nodeTypes = {
   custom: CustomNode,
