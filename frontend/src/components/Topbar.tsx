@@ -60,7 +60,7 @@ const Topbar = () => {
     a.click();
   };
 
-  const getPreciseViewportDataUrl = async (): Promise<{dataUrl: string, width: number, height: number} | null> => {
+  const getPreciseViewportDataUrl = async (isTransparent: boolean = false): Promise<{dataUrl: string, width: number, height: number} | null> => {
     const element = document.querySelector('.react-flow__viewport') as HTMLElement;
     if (!element || nodes.length === 0) return null;
 
@@ -72,7 +72,7 @@ const Topbar = () => {
     const viewport = getViewportForBounds(nodesBounds, width, height, 0.5, 2, 0.1);
 
     const dataUrl = await toPng(element, {
-      backgroundColor: '#f3f4f6',
+      backgroundColor: isTransparent ? 'transparent' : '#ffffff', // Use transparent for PNG, white for PDF
       width: width,
       height: height,
       pixelRatio: 3, // Boost resolution by 3x for crisp output
@@ -89,7 +89,7 @@ const Topbar = () => {
   const exportPNG = async () => {
     const loadingToast = toast.loading('正在輸出 PNG...');
     try {
-      const result = await getPreciseViewportDataUrl();
+      const result = await getPreciseViewportDataUrl(true); // Pass true for transparent PNG
       if (result) {
         downloadImage(result.dataUrl, `bowtie-${new Date().getTime()}.png`);
         toast.success('PNG 輸出成功！', { id: loadingToast });
@@ -104,7 +104,7 @@ const Topbar = () => {
   const exportPDF = async () => {
     const loadingToast = toast.loading('正在輸出 PDF...');
     try {
-      const result = await getPreciseViewportDataUrl();
+      const result = await getPreciseViewportDataUrl(false); // Pass false for white background PDF
       if (!result) {
         toast.error('畫布上沒有節點可以輸出', { id: loadingToast });
         return;
