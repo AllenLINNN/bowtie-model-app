@@ -123,7 +123,7 @@ const Editor = () => {
   }), []);
 
   return (
-    <div className="flex-grow h-full w-full" ref={reactFlowWrapper}>
+    <div className="flex-grow h-full w-full relative" ref={reactFlowWrapper}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -144,6 +144,31 @@ const Editor = () => {
         <Panel position="top-right" className="bg-white/80 p-2 rounded shadow text-xs text-gray-600">
           提示：拖曳節點並從左至右連線（威脅 &rarr; 頂端事件 &rarr; 後果）。
         </Panel>
+        
+        {nodes.length === 0 && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="bg-white/90 p-8 rounded-xl shadow-lg border border-blue-100 max-w-lg text-center backdrop-blur-sm pointer-events-auto">
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">開始建構您的 Bowtie 模型</h2>
+              <p className="text-gray-600 mb-6 leading-relaxed">
+                這是一個空白的畫布。請依照以下三個簡單的步驟開始：
+              </p>
+              <div className="text-left space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="bg-blue-100 text-blue-600 rounded-full w-6 h-6 flex items-center justify-center font-bold shrink-0 mt-0.5">1</div>
+                  <p className="text-sm text-gray-700">從左側的 <strong>「節點範本」</strong> 拖曳您需要的元素（如 Hazard、Top Event）到這個畫布上。</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="bg-blue-100 text-blue-600 rounded-full w-6 h-6 flex items-center justify-center font-bold shrink-0 mt-0.5">2</div>
+                  <p className="text-sm text-gray-700">在畫布上 <strong>雙擊節點</strong> 可以快速修改名稱。點擊節點後，也能在右側的 <strong>屬性面板</strong> 輸入詳細資料並將它「儲存至庫」。</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="bg-blue-100 text-blue-600 rounded-full w-6 h-6 flex items-center justify-center font-bold shrink-0 mt-0.5">3</div>
+                  <p className="text-sm text-gray-700">將滑鼠游標移到節點邊緣的圓點，按住並拖曳即可將節點連線起來，建立完整的風險關聯圖！</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </ReactFlow>
     </div>
   );
