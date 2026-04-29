@@ -93,7 +93,7 @@ const Sidebar = () => {
                         draggable
                       >
                         <div className="mb-1.5">
-                          <span className="inline-block bg-white/80 border border-current/20 rounded px-1.5 py-0.5 text-[10px] font-mono opacity-80">
+                          <span className="inline-block bg-white/90 border border-black/10 rounded px-1.5 py-0.5 text-[10px] font-mono text-slate-800 opacity-90 shadow-sm">
                             {item.entityData?.code || '尚未編號'}
                           </span>
                         </div>
