@@ -1,46 +1,36 @@
 # Bowtie Web App
 
-This project aims to build a web application for creating, editing, and managing Bowtie risk models. It features a visual drag-and-drop editor and a robust database management system for various risk entities.
+This project is a React-based web application for creating, editing, and managing Bowtie risk models. It features a visual drag-and-drop editor (React Flow) and a local-first database management system.
 
-## Project Overview
+## Schema vs. Prototype Implementation
 
-- **Purpose:** Provide a tool for risk management professionals to visualize and manage hazards, top events, threats, consequences, and barriers.
-- **Core Methodology:** Follows the Bowtie model logic where:
-  - **Hazard:** Source of harm.
-  - **Top Event:** Moment control over the hazard is lost.
-  - **Threats:** Causes leading to the Top Event.
-  - **Consequences:** Outcomes after the Top Event.
-  - **Barriers:** Control measures (preventive on the left, mitigative on the right).
-- **Tech Stack:**
-  - **Frontend:** React + TypeScript
-  - **UI:** Tailwind CSS
-  - **Diagram Editor:** React Flow
-  - **State Management:** Zustand
-  - **Persistence:** IndexedDB or local JSON export/import (MVP focus)
+The `Bowtie app schema.md` contains the comprehensive, future-ready relational database design (with strict tables, foreign keys, and extensive metadata fields like `category`, `lifecycle_phase`, etc.). 
 
-## Building and Running
+**Current Prototype Status:**
+To achieve a fully offline, serverless experience that can be hosted on GitHub Pages, the current prototype implements a **Local-First NoSQL-like approach** using `IndexedDB` (via `localforage`) and `Zustand`. 
+- **Data Model:** Instead of strict relational tables, the app uses a flexible `DiagramNodeData` interface where specific entity properties (like `code`, `owner`, `effectiveness`) are stored in an `entityData` dictionary.
+- **Relationships:** The "many-to-many" relationships defined in the schema (e.g., `ThreatBarrierLink`) are handled intrinsically by the graphical `edges` drawn in React Flow, rather than explicit linking tables.
+- **Global Library:** Entities can be saved from individual project canvases into a global `library`, allowing them to be reused across different Bowtie diagrams.
 
-*Note: The project is currently in the initial design phase. No code has been scaffolded yet.*
+## Core Rules & Conventions
 
-- **Install Dependencies:** `npm install` (TODO: verify when project is initialized)
-- **Run Development Server:** `npm start` or `npm run dev` (TODO: verify)
-- **Build for Production:** `npm run build` (TODO: verify)
-- **Run Tests:** `npm test` (TODO: verify)
-
-## Development Conventions
-
-- **Type Safety:** Use TypeScript for all core domain models and application logic.
-- **Architecture:** Follow a feature-based folder structure:
-  - `src/features/`: Entity-specific logic (hazards, threats, etc.)
-  - `src/components/`: Reusable UI components.
-  - `src/store/`: Zustand state management.
-- **Validation:** Enforce bowtie semantics (e.g., valid connection rules) both in the UI and data layer.
-- **Visuals:** Use consistent node styles and color coding (Hazard: dark blue, Top Event: orange/red, etc.).
+1. **Local-First Security:** The app MUST remain fully functional offline. Do not introduce server-side API calls for core CRUD operations. All state MUST be persisted to `IndexedDB`.
+2. **Auto-Numbering (Critical Rule):**
+   - When a node is dragged from "Templates" to the canvas, it receives a **preview** code via `peekNextCode()`.
+   - The global counter is **ONLY incremented** when the user clicks "Save" in the Properties Panel to store the node in the Global Library. This prevents sequence gaps.
+3. **Bowtie Rules Validation:** Nodes can only be connected in specific logical sequences (e.g., Threat -> Preventive Barrier -> Top Event). Preventive barriers can connect to other preventive barriers. Mitigative barriers can connect to mitigative barriers.
+4. **Node Styling:**
+   - Hazard: Dark Blue (`bg-blue-900`)
+   - Top Event: Red (`bg-red-600`)
+   - Threat: Blue (`bg-blue-500`)
+   - Consequence: Red (`bg-red-500`)
+   - Barriers: Light Gray (`bg-gray-200`)
+5. **Deployment:** The project is deployed to GitHub Pages using a GitHub Actions workflow (`.github/workflows/deploy.yml`). It uses `base: '/'` for a User Page root deployment.
 
 ## Key Files
-
-- `Bowtie app schema.md`: Comprehensive PRD and technical specification, including data models and functional requirements.
-- `GEMINI.md`: This file, providing instructional context for AI interactions.
+- `src/store/useStore.ts`: The central nervous system handling state, persistence, library management, and auto-coding logic.
+- `src/components/BowtieEditor.tsx`: The React Flow canvas where node dropping, connection validation, and visual rendering happen.
+- `src/types/index.ts`: Shared TypeScript interfaces.
 
 ## Language
 - 回覆與語言以繁體中文為主，專有名詞除外。
