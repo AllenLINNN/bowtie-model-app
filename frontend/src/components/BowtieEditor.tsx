@@ -1,7 +1,6 @@
 import React, { useRef, useCallback, useMemo } from 'react';
 import {
   ReactFlow,
-  ReactFlowProvider,
   Controls,
   Background,
   Panel,
@@ -143,19 +142,11 @@ const Editor = () => {
         <Background />
         <Controls />
         <Panel position="top-right" className="bg-white/80 p-2 rounded shadow text-xs text-gray-600">
-          Tip: Drop nodes and connect them strictly left-to-right (Threat &rarr; Top Event &rarr; Consequence).
+          提示：拖曳節點並從左至右連線（威脅 &rarr; 頂端事件 &rarr; 後果）。
         </Panel>
       </ReactFlow>
     </div>
   );
 };
 
-const BowtieEditor = () => {
-  return (
-    <ReactFlowProvider>
-      <Editor />
-    </ReactFlowProvider>
-  );
-};
-
-export default BowtieEditor;
+export default Editor;

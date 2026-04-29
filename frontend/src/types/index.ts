@@ -17,6 +17,7 @@ export interface EntityData {
   description?: string;
   effectiveness?: string;
   owner?: string;
+  barrier_type?: 'behavioral' | 'socio-technical' | 'active-hardware' | 'continuous-hardware' | 'passive-hardware' | 'organizational' | 'other';
   [key: string]: any;
 }
 

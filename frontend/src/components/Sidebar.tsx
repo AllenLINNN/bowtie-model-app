@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { NodeType } from '../types';
 import { useStore } from '../store/useStore';
 import { Database, PlusSquare, Trash2 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const Sidebar = () => {
   const [activeTab, setActiveTab] = useState<'templates' | 'library'>('templates');
@@ -18,13 +19,19 @@ const Sidebar = () => {
     event.dataTransfer.effectAllowed = 'move';
   };
 
+  const handleRemove = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    removeFromLibrary(id);
+    toast.success('已從資料庫刪除');
+  };
+
   const nodeTypes: { type: NodeType; label: string; colorClass: string }[] = [
-    { type: 'hazard', label: 'Hazard', colorClass: 'bg-blue-900 text-white border-blue-950' },
-    { type: 'top_event', label: 'Top Event', colorClass: 'bg-red-600 text-white border-red-700' },
-    { type: 'threat', label: 'Threat', colorClass: 'bg-blue-500 text-white border-blue-600' },
-    { type: 'preventive_barrier', label: 'Preventive Barrier', colorClass: 'bg-gray-200 text-gray-800 border-gray-400' },
-    { type: 'mitigative_barrier', label: 'Mitigative Barrier', colorClass: 'bg-gray-200 text-gray-800 border-gray-400' },
-    { type: 'consequence', label: 'Consequence', colorClass: 'bg-red-500 text-white border-red-600' },
+    { type: 'hazard', label: '危害 (Hazard)', colorClass: 'bg-blue-900 text-white border-blue-950' },
+    { type: 'top_event', label: '頂端事件 (Top Event)', colorClass: 'bg-red-600 text-white border-red-700' },
+    { type: 'threat', label: '威脅 (Threat)', colorClass: 'bg-blue-500 text-white border-blue-600' },
+    { type: 'preventive_barrier', label: '預防性屏障 (Preventive)', colorClass: 'bg-gray-200 text-gray-800 border-gray-400' },
+    { type: 'mitigative_barrier', label: '減緩性屏障 (Mitigative)', colorClass: 'bg-gray-200 text-gray-800 border-gray-400' },
+    { type: 'consequence', label: '後果 (Consequence)', colorClass: 'bg-red-500 text-white border-red-600' },
   ];
 
   return (
@@ -34,20 +41,20 @@ const Sidebar = () => {
           className={`flex-1 py-3 text-sm font-semibold flex items-center justify-center gap-2 ${activeTab === 'templates' ? 'bg-white text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:bg-gray-100'}`}
           onClick={() => setActiveTab('templates')}
         >
-          <PlusSquare size={16} /> Templates
+          <PlusSquare size={16} /> 節點範本
         </button>
         <button 
           className={`flex-1 py-3 text-sm font-semibold flex items-center justify-center gap-2 ${activeTab === 'library' ? 'bg-white text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:bg-gray-100'}`}
           onClick={() => setActiveTab('library')}
         >
-          <Database size={16} /> Library
+          <Database size={16} /> 專屬資料庫
         </button>
       </div>
 
       <div className="p-4 flex-grow overflow-y-auto">
         {activeTab === 'templates' ? (
           <div className="flex flex-col gap-3">
-            <div className="text-xs text-gray-500 mb-2">Drag blank nodes to create new entities.</div>
+            <div className="text-xs text-gray-500 mb-2">拖曳下方空白節點至畫布以開始分析。</div>
             {nodeTypes.map((nt) => (
               <div
                 key={nt.type}
@@ -61,10 +68,10 @@ const Sidebar = () => {
           </div>
         ) : (
           <div className="flex flex-col gap-4">
-            <div className="text-xs text-gray-500 mb-1">Drag saved entities from your library.</div>
+            <div className="text-xs text-gray-500 mb-1">拖曳您儲存的專屬節點以快速套用設定。</div>
             {library.length === 0 && (
               <div className="text-center py-8 text-sm text-gray-400 border border-dashed border-gray-300 rounded">
-                Your library is empty.<br/>Save nodes from the properties panel.
+                資料庫目前是空的。<br/>請在畫布點擊節點並按下「儲存至庫」。
               </div>
             )}
             
@@ -75,7 +82,7 @@ const Sidebar = () => {
               return (
                 <div key={`lib-group-${nt.type}`} className="flex flex-col gap-2">
                   <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider border-b border-gray-200 pb-1">
-                    {nt.label}s
+                    {nt.label}
                   </div>
                   {items.map((item) => (
                     <div key={item.id} className="relative group">
@@ -85,13 +92,13 @@ const Sidebar = () => {
                         onClick={() => setSelectedLibraryItemId(item.id)}
                         draggable
                       >
-                        <div className="text-[10px] opacity-75 font-mono mb-1">{item.entityData?.code || 'NO-CODE'}</div>
+                        <div className="text-[10px] opacity-75 font-mono mb-1">{item.entityData?.code || '尚未編號'}</div>
                         <div className="truncate">{item.label}</div>
                       </div>
                       <button 
-                        onClick={() => removeFromLibrary(item.id)}
+                        onClick={(e) => handleRemove(item.id, e)}
                         className="absolute right-2 top-1/2 -translate-y-1/2 text-white/70 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
-                        title="Remove from Library"
+                        title="從資料庫刪除"
                       >
                         <Trash2 size={14} />
                       </button>

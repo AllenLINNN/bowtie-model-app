@@ -5,6 +5,8 @@ import BowtieEditor from './components/BowtieEditor';
 import PropertiesPanel from './components/PropertiesPanel';
 import Dashboard from './components/Dashboard';
 import { useStore } from './store/useStore';
+import { ReactFlowProvider } from '@xyflow/react';
+import { Toaster } from 'react-hot-toast';
 
 function App() {
   const { loadData, isLoading, activeProjectId } = useStore();
@@ -18,20 +20,23 @@ function App() {
   }
 
   return (
-    <div className="flex flex-col h-screen w-screen bg-gray-100 overflow-hidden">
-      <Topbar />
-      {activeProjectId ? (
-        <div className="flex flex-row flex-grow h-[calc(100vh-56px)]">
-          <Sidebar />
-          <main className="flex-grow h-full relative">
-            <BowtieEditor />
-          </main>
-          <PropertiesPanel />
-        </div>
-      ) : (
-        <Dashboard />
-      )}
-    </div>
+    <ReactFlowProvider>
+      <div className="flex flex-col h-screen w-screen bg-gray-100 overflow-hidden">
+        <Toaster position="bottom-right" />
+        <Topbar />
+        {activeProjectId ? (
+          <div className="flex flex-row flex-grow h-[calc(100vh-56px)]">
+            <Sidebar />
+            <main className="flex-grow h-full relative">
+              <BowtieEditor />
+            </main>
+            <PropertiesPanel />
+          </div>
+        ) : (
+          <Dashboard />
+        )}
+      </div>
+    </ReactFlowProvider>
   );
 }
 
