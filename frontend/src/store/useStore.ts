@@ -64,7 +64,7 @@ interface AppState {
   updateNodeData: (nodeId: string, newData: any) => void;
 
   // Library Actions
-  addToLibrary: (item: Omit<LibraryItem, 'id' | 'created_at'>) => void;
+  addToLibrary: (item: Omit<LibraryItem, 'id' | 'created_at'>) => string;
   removeFromLibrary: (id: string) => void;
 
   // Export / Import
@@ -264,9 +264,10 @@ export const useStore = create<AppState>((set, get) => ({
       newCounters[item.type] = (state.counters[item.type] || 0) + 1;
     }
 
+    const newId = uuidv4();
     const newItem: LibraryItem = {
       ...item,
-      id: uuidv4(),
+      id: newId,
       created_at: Date.now()
     };
     set({
@@ -274,6 +275,7 @@ export const useStore = create<AppState>((set, get) => ({
       counters: newCounters
     });
     get().saveData();
+    return newId;
   },
 
   updateLibraryItem: (id, newData) => {

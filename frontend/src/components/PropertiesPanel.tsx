@@ -56,11 +56,14 @@ const PropertiesPanel = () => {
       });
       toast.success(`已將 "${data.label}" 更新至資料庫！`);
     } else {
-      addToLibrary({
+      const newId = addToLibrary({
         type: data.type,
         label: data.label,
         entityData: data.entityData || {}
       });
+      if (selectedNode) {
+        updateNodeData(selectedNode.id, { fromLibraryId: newId });
+      }
       toast.success(`已將 "${data.label}" 儲存至資料庫！`);
     }
   };
