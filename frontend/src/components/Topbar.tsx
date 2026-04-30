@@ -9,7 +9,7 @@ import { getLayoutedElements } from '../utils/layout';
 import toast from 'react-hot-toast';
 
 const Topbar = () => {
-  const { exportJSON, importJSON, activeProjectId, projects, openProject, updateProjectName, nodes, edges, setNodes, setEdges, isSidebarOpen, isPropertiesPanelOpen, toggleSidebar, togglePropertiesPanel } = useStore();
+  const { exportJSON, importJSON, exportProjectJSON, importProjectJSON, activeProjectId, projects, openProject, updateProjectName, nodes, edges, setNodes, setEdges, isSidebarOpen, isPropertiesPanelOpen, toggleSidebar, togglePropertiesPanel } = useStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const reactFlowInstance = useReactFlow();
 
@@ -46,7 +46,11 @@ const Topbar = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      importJSON(file);
+      if (activeProjectId) {
+        importProjectJSON(file);
+      } else {
+        importJSON(file);
+      }
     }
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -206,8 +210,20 @@ const Topbar = () => {
             <FileUp size={16} /> <span className="text-sm">匯入工作區 JSON</span>
           </button>
           
-          <button onClick={() => { exportJSON(); toast.success('工作區已下載'); }} className="btn-action" title="下載工作區">
-            <Download size={16} /> <span className="text-sm">下載工作區 JSON</span>
+          <button 
+            onClick={() => { 
+              if (activeProjectId) {
+                exportProjectJSON(activeProjectId);
+                toast.success('單一專案已下載');
+              } else {
+                exportJSON(); 
+                toast.success('工作區已下載');
+              }
+            }} 
+            className="btn-action" 
+            title={activeProjectId ? "下載單一專案" : "下載工作區"}
+          >
+            <Download size={16} /> <span className="text-sm">{activeProjectId ? "下載單一專案" : "下載工作區 JSON"}</span>
           </button>
           
           {activeProjectId && (

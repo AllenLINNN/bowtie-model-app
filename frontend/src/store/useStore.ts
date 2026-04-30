@@ -70,6 +70,8 @@ interface AppState {
   // Export / Import
   exportJSON: () => void;
   importJSON: (file: File) => Promise<void>;
+  exportProjectJSON: (projectId: string) => void;
+  importProjectJSON: (file: File) => Promise<void>;
 }
 
 export const useStore = create<AppState>((set, get) => ({
@@ -315,9 +317,55 @@ export const useStore = create<AppState>((set, get) => ({
           edges: []
         });
         await get().saveData();
+        toast.success("工作區匯入成功");
+      } else {
+        toast.error("這不是一個有效的工作區 JSON 檔案");
       }
     } catch (error) {
       console.error("Failed to parse JSON file", error);
+      toast.error("無效的 JSON 檔案或格式錯誤");
+    }
+  },
+
+  exportProjectJSON: (projectId) => {
+    const project = get().projects.find(p => p.id === projectId);
+    if (!project) return;
+    const data = JSON.stringify({
+      isSingleProject: true,
+      project: project
+    }, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `bowtie-project-${project.name}-${new Date().getTime()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  },
+
+  importProjectJSON: async (file: File) => {
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      
+      if (data.isSingleProject && data.project) {
+        // Append as a new project
+        const newProject = {
+          ...data.project,
+          id: uuidv4(), // generate new ID to avoid collision
+          name: `${data.project.name} (匯入)`,
+          last_modified: Date.now()
+        };
+        set((state) => ({
+          projects: [...state.projects, newProject]
+        }));
+        await get().saveData();
+        toast.success(`已匯入專案：${newProject.name}`);
+      } else {
+        toast.error("這不是一個有效的單一專案 JSON 檔案");
+      }
+    } catch (error) {
+      console.error("Failed to parse project JSON file", error);
       toast.error("無效的 JSON 檔案或格式錯誤");
     }
   }

@@ -49,12 +49,20 @@ const PropertiesPanel = () => {
   };
 
   const handleSaveToLibrary = () => {
-    addToLibrary({
-      type: data.type,
-      label: data.label,
-      entityData: data.entityData || {}
-    });
-    toast.success(`已將 "${data.label}" 儲存至資料庫！`);
+    if (data.fromLibraryId) {
+      updateLibraryItem(data.fromLibraryId, {
+        label: data.label,
+        entityData: data.entityData || {}
+      });
+      toast.success(`已將 "${data.label}" 更新至資料庫！`);
+    } else {
+      addToLibrary({
+        type: data.type,
+        label: data.label,
+        entityData: data.entityData || {}
+      });
+      toast.success(`已將 "${data.label}" 儲存至資料庫！`);
+    }
   };
 
   const entityData = data.entityData || {};

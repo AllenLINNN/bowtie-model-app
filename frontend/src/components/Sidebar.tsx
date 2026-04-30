@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { NodeType } from '../types';
 import { useStore } from '../store/useStore';
-import { Database, PlusSquare, Trash2 } from 'lucide-react';
+import { Database, PlusSquare, Trash2, ChevronRight, ChevronLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const Sidebar = () => {
   const [activeTab, setActiveTab] = useState<'templates' | 'library'>('templates');
+  const [selectedCategory, setSelectedCategory] = useState<NodeType | null>(null);
   const { library, removeFromLibrary, setSelectedLibraryItemId, selectedLibraryItemId } = useStore();
 
   const onDragStartTemplate = (event: React.DragEvent<HTMLDivElement>, nodeType: NodeType, label: string) => {
@@ -25,21 +26,21 @@ const Sidebar = () => {
     toast.success('已從資料庫刪除');
   };
 
-  const nodeTypes: { type: NodeType; label: string; colorClass: string }[] = [
-    { type: 'hazard', label: '危害 (Hazard)', colorClass: 'bg-blue-700 text-white' },
-    { type: 'top_event', label: '頂端事件 (Top Event)', colorClass: 'bg-red-600 text-white' },
-    { type: 'threat', label: '威脅 (Threat)', colorClass: 'bg-blue-500 text-white' },
-    { type: 'preventive_barrier', label: '預防性屏障 (Preventive)', colorClass: 'bg-emerald-500 text-white' },
-    { type: 'mitigative_barrier', label: '減緩性屏障 (Mitigative)', colorClass: 'bg-purple-500 text-white' },
-    { type: 'consequence', label: '後果 (Consequence)', colorClass: 'bg-orange-500 text-white' },
+  const nodeTypes: { type: NodeType; label: string; colorClass: string; borderL: string }[] = [
+    { type: 'hazard', label: '危害 (Hazard)', colorClass: 'bg-blue-700 text-white', borderL: 'border-l-blue-700' },
+    { type: 'top_event', label: '頂端事件 (Top Event)', colorClass: 'bg-red-600 text-white', borderL: 'border-l-red-600' },
+    { type: 'threat', label: '威脅 (Threat)', colorClass: 'bg-blue-500 text-white', borderL: 'border-l-blue-500' },
+    { type: 'preventive_barrier', label: '預防性屏障 (Preventive)', colorClass: 'bg-emerald-500 text-white', borderL: 'border-l-emerald-500' },
+    { type: 'mitigative_barrier', label: '減緩性屏障 (Mitigative)', colorClass: 'bg-purple-500 text-white', borderL: 'border-l-purple-500' },
+    { type: 'consequence', label: '後果 (Consequence)', colorClass: 'bg-orange-500 text-white', borderL: 'border-l-orange-500' },
   ];
 
   return (
     <aside className="w-64 border-r border-gray-200 bg-gray-50 flex flex-col h-full shrink-0">
-      <div className="flex border-b border-gray-200">
+      <div className="flex border-b border-gray-200 shrink-0">
         <button 
           className={`flex-1 py-3 text-sm font-semibold flex items-center justify-center gap-2 ${activeTab === 'templates' ? 'bg-white text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:bg-gray-100'}`}
-          onClick={() => setActiveTab('templates')}
+          onClick={() => { setActiveTab('templates'); setSelectedCategory(null); }}
         >
           <PlusSquare size={16} /> 節點範本
         </button>
@@ -51,7 +52,7 @@ const Sidebar = () => {
         </button>
       </div>
 
-      <div className="p-4 flex-grow overflow-y-auto">
+      <div className="p-4 flex-grow overflow-y-auto relative">
         {activeTab === 'templates' ? (
           <div className="flex flex-col gap-3">
             <div className="text-xs text-gray-500 mb-2">拖曳下方空白節點至畫布以開始分析。</div>
@@ -67,50 +68,81 @@ const Sidebar = () => {
             ))}
           </div>
         ) : (
-          <div className="flex flex-col gap-4">
-            <div className="text-xs text-gray-500 mb-1">拖曳您儲存的專屬節點以快速套用設定。</div>
-            {library.length === 0 && (
-              <div className="text-center py-8 text-sm text-gray-400 border border-dashed border-gray-300 rounded">
-                資料庫目前是空的。<br/>請在畫布點擊節點並按下「儲存至庫」。
+          <div className="flex flex-col h-full">
+            {!selectedCategory ? (
+              <div className="flex flex-col gap-3 animate-in fade-in duration-200">
+                <div className="text-xs text-gray-500 mb-2">選擇節點類別以檢視儲存的項目。</div>
+                {nodeTypes.map((nt) => {
+                  const count = library.filter(item => item.type === nt.type).length;
+                  return (
+                    <button
+                      key={`cat-${nt.type}`}
+                      onClick={() => setSelectedCategory(nt.type)}
+                      className="flex items-center justify-between p-3 rounded-lg border border-gray-200 bg-white hover:border-blue-300 hover:shadow-sm transition-all group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-3 h-3 rounded-full ${nt.colorClass.split(' ')[0]}`}></div>
+                        <span className="font-medium text-sm text-gray-700">{nt.label}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full font-mono">{count}</span>
+                        <ChevronRight size={16} className="text-gray-400 group-hover:text-blue-500 transition-colors" />
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="flex flex-col gap-4 animate-in slide-in-from-right-4 fade-in duration-200">
+                <div className="flex items-center gap-2 mb-2 pb-3 border-b border-gray-200">
+                  <button 
+                    onClick={() => setSelectedCategory(null)}
+                    className="p-1 hover:bg-gray-200 rounded text-gray-500 transition-colors"
+                  >
+                    <ChevronLeft size={18} />
+                  </button>
+                  <div className="font-bold text-sm text-gray-800">
+                    {nodeTypes.find(n => n.type === selectedCategory)?.label}
+                  </div>
+                </div>
+
+                {library.filter(item => item.type === selectedCategory).length === 0 ? (
+                  <div className="text-center py-10 text-sm text-gray-400 border-2 border-dashed border-gray-200 rounded-lg">
+                    此類別目前沒有儲存的節點。
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-3">
+                    {library.filter(item => item.type === selectedCategory).map((item) => {
+                      const nt = nodeTypes.find(n => n.type === item.type)!;
+                      return (
+                        <div key={item.id} className="relative group">
+                          <div
+                            className={`p-3 pr-8 rounded shadow-sm cursor-grab font-medium text-sm text-left transition-all ${nt.colorClass} ${selectedLibraryItemId === item.id ? 'ring-2 ring-blue-400 ring-offset-1' : 'hover:shadow-md'}`}
+                            onDragStart={(event) => onDragStartLibrary(event, item.id)}
+                            onClick={() => setSelectedLibraryItemId(item.id)}
+                            draggable
+                          >
+                            <div className="mb-1.5">
+                              <span className="inline-block bg-white/90 border border-black/10 rounded px-1.5 py-0.5 text-[10px] font-mono text-slate-800 opacity-90 shadow-sm">
+                                {item.entityData?.code || '尚未編號'}
+                              </span>
+                            </div>
+                            <div className="truncate">{item.label}</div>
+                          </div>
+                          <button 
+                            onClick={(e) => handleRemove(item.id, e)}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 rounded p-1 shadow-sm"
+                            title="從資料庫刪除"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             )}
-            
-            {nodeTypes.map((nt) => {
-              const items = library.filter(item => item.type === nt.type);
-              if (items.length === 0) return null;
-              
-              return (
-                <div key={`lib-group-${nt.type}`} className="flex flex-col gap-2">
-                  <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider border-b border-gray-200 pb-1">
-                    {nt.label}
-                  </div>
-                  {items.map((item) => (
-                    <div key={item.id} className="relative group">
-                      <div
-                        className={`p-3 pr-8 rounded shadow-sm cursor-grab font-medium text-sm text-left transition-all ${nt.colorClass} ${selectedLibraryItemId === item.id ? 'ring-2 ring-blue-400 ring-offset-1' : 'hover:shadow-md'}`}
-                        onDragStart={(event) => onDragStartLibrary(event, item.id)}
-                        onClick={() => setSelectedLibraryItemId(item.id)}
-                        draggable
-                      >
-                        <div className="mb-1.5">
-                          <span className="inline-block bg-white/90 border border-black/10 rounded px-1.5 py-0.5 text-[10px] font-mono text-slate-800 opacity-90 shadow-sm">
-                            {item.entityData?.code || '尚未編號'}
-                          </span>
-                        </div>
-                        <div className="truncate">{item.label}</div>
-                      </div>
-                      <button 
-                        onClick={(e) => handleRemove(item.id, e)}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 rounded p-1 shadow-sm"
-                        title="從資料庫刪除"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              );
-            })}
           </div>
         )}
       </div>
