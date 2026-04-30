@@ -1,17 +1,25 @@
 import { useState } from 'react';
 import { useStore } from '../store/useStore';
 import { format } from 'date-fns';
-import { FolderOpen, Plus, Trash2, ArchiveRestore, Archive, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { FolderOpen, Plus, Trash2, ArchiveRestore, Archive, CheckCircle2, AlertTriangle, Search } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const Dashboard = () => {
   const { projects, createProject, openProject, deleteProject, restoreProject, permanentlyDeleteProject } = useStore();
   const [newProjectName, setNewProjectName] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [viewArchived, setViewArchived] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
-  const activeProjects = projects.filter(p => !p.archived).sort((a, b) => b.last_modified - a.last_modified);
-  const archivedProjects = projects.filter(p => p.archived).sort((a, b) => b.last_modified - a.last_modified);
+  const activeProjects = projects
+    .filter(p => !p.archived && p.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    .sort((a, b) => b.last_modified - a.last_modified);
+    
+  const archivedProjects = projects
+    .filter(p => p.archived && p.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    .sort((a, b) => b.last_modified - a.last_modified);
+    
+  const totalArchivedCount = projects.filter(p => p.archived).length;
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
@@ -218,25 +226,40 @@ const Dashboard = () => {
             {viewArchived ? (
               <><FolderOpen size={16} /> 返回專案列表</>
             ) : (
-              <><Archive size={16} /> 檢視垃圾桶 <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full text-xs">{archivedProjects.length}</span></>
+              <><Archive size={16} /> 檢視垃圾桶 <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full text-xs">{totalArchivedCount}</span></>
             )}
           </button>
         </div>
         
-        {!viewArchived && (
-          <form onSubmit={handleCreate} className="mb-10 bg-white p-2 rounded-xl shadow-sm border border-slate-200 flex gap-2">
+        <div className="flex flex-col md:flex-row gap-4 mb-10">
+          {!viewArchived && (
+            <form onSubmit={handleCreate} className="bg-white p-2 rounded-xl shadow-sm border border-slate-200 flex gap-2 flex-grow">
+              <input 
+                type="text" 
+                value={newProjectName}
+                onChange={(e) => setNewProjectName(e.target.value)}
+                placeholder="輸入新專案名稱開始分析..." 
+                className="flex-grow px-4 py-3 bg-transparent focus:outline-none text-slate-700 placeholder:text-slate-400"
+              />
+              <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2 transition-all shadow-sm hover:shadow shrink-0">
+                <Plus size={18} /> 建立新專案
+              </button>
+            </form>
+          )}
+
+          <div className={`bg-white p-2 rounded-xl shadow-sm border border-slate-200 flex items-center gap-2 ${viewArchived ? 'w-full' : 'w-full md:w-1/3'}`}>
+            <div className="pl-3 text-slate-400 shrink-0">
+              <Search size={18} />
+            </div>
             <input 
               type="text" 
-              value={newProjectName}
-              onChange={(e) => setNewProjectName(e.target.value)}
-              placeholder="輸入新專案名稱開始分析..." 
-              className="flex-grow px-4 py-3 bg-transparent focus:outline-none text-slate-700 placeholder:text-slate-400"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="搜尋專案名稱..." 
+              className="flex-grow px-2 py-3 bg-transparent focus:outline-none text-slate-700 placeholder:text-slate-400"
             />
-            <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2 transition-all shadow-sm hover:shadow">
-              <Plus size={18} /> 建立新專案
-            </button>
-          </form>
-        )}
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {viewArchived ? (
