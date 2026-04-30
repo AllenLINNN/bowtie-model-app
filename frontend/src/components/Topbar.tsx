@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { useStore } from '../store/useStore';
 import { format } from 'date-fns';
-import { Download, Image, FileText, WifiOff, ArrowLeft, Edit2, LayoutTemplate, PanelLeftClose, PanelLeft, PanelRightClose, PanelRight, FileUp } from 'lucide-react';
+import { Download, Image, FileText, WifiOff, ArrowLeft, Edit2, LayoutTemplate, PanelLeftClose, PanelLeft, PanelRightClose, PanelRight, FileUp, Map } from 'lucide-react';
 import { toPng } from 'html-to-image';
 import jsPDF from 'jspdf';
 import { useReactFlow, getNodesBounds, getViewportForBounds } from '@xyflow/react';
@@ -9,7 +9,7 @@ import { getLayoutedElements } from '../utils/layout';
 import toast from 'react-hot-toast';
 
 const Topbar = () => {
-  const { exportJSON, importJSON, exportProjectJSON, importProjectJSON, activeProjectId, projects, openProject, updateProjectName, nodes, edges, setNodes, setEdges, isSidebarOpen, isPropertiesPanelOpen, toggleSidebar, togglePropertiesPanel } = useStore();
+  const { exportJSON, importJSON, exportProjectJSON, importProjectJSON, activeProjectId, projects, openProject, updateProjectName, nodes, edges, setNodes, setEdges, isSidebarOpen, isPropertiesPanelOpen, isMiniMapOpen, toggleSidebar, togglePropertiesPanel, toggleMiniMap } = useStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const reactFlowInstance = useReactFlow();
 
@@ -240,6 +240,13 @@ const Topbar = () => {
                 <FileText size={16} /> <span className="text-sm">PDF</span>
               </button>
               <div className="w-px h-6 bg-gray-300 mx-1"></div>
+              <button 
+                onClick={toggleMiniMap} 
+                className={`flex items-center p-1.5 rounded transition-colors ${isMiniMapOpen ? 'text-blue-600 bg-blue-50 hover:bg-blue-100' : 'text-gray-400 hover:text-blue-600 hover:bg-gray-100'}`}
+                title={isMiniMapOpen ? "隱藏迷你地圖" : "顯示迷你地圖"}
+              >
+                <Map size={20} />
+              </button>
               <button 
                 onClick={togglePropertiesPanel} 
                 className={`flex items-center p-1.5 rounded transition-colors ${isPropertiesPanelOpen ? 'text-blue-600 bg-blue-50 hover:bg-blue-100' : 'text-gray-400 hover:text-blue-600 hover:bg-gray-100'}`}

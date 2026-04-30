@@ -32,8 +32,10 @@ interface AppState {
   // UI State
   isSidebarOpen: boolean;
   isPropertiesPanelOpen: boolean;
+  isMiniMapOpen: boolean;
   toggleSidebar: () => void;
   togglePropertiesPanel: () => void;
+  toggleMiniMap: () => void;
 
   // Active Project State (mirrors the active project's nodes/edges for React Flow)
   nodes: BowtieNode[];
@@ -84,8 +86,10 @@ export const useStore = create<AppState>((set, get) => ({
   isLoading: true,
   isSidebarOpen: true,
   isPropertiesPanelOpen: true,
+  isMiniMapOpen: false,
   toggleSidebar: () => set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
   togglePropertiesPanel: () => set((state) => ({ isPropertiesPanelOpen: !state.isPropertiesPanelOpen })),
+  toggleMiniMap: () => set((state) => ({ isMiniMapOpen: !state.isMiniMapOpen })),
   nodes: [],
   edges: [],
 

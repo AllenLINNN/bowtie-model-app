@@ -10,8 +10,8 @@ const Dashboard = () => {
   const [viewArchived, setViewArchived] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
-  const activeProjects = projects.filter(p => !p.archived);
-  const archivedProjects = projects.filter(p => p.archived);
+  const activeProjects = projects.filter(p => !p.archived).sort((a, b) => b.last_modified - a.last_modified);
+  const archivedProjects = projects.filter(p => p.archived).sort((a, b) => b.last_modified - a.last_modified);
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();

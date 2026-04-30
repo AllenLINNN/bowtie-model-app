@@ -139,10 +139,11 @@ const PropertiesPanel = () => {
             <label className="text-xs font-semibold text-gray-700">控制效力 (Effectiveness)</label>
             <select 
               name="effectiveness" 
-              value={entityData.effectiveness || 'good'} 
+              value={entityData.effectiveness || ''} 
               onChange={handleChange}
               className="border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all bg-white"
             >
+              <option value="" disabled>請選擇效力...</option>
               <option value="very-good">非常好 (Very Good)</option>
               <option value="good">良好 (Good)</option>
               <option value="poor">不佳 (Poor)</option>
@@ -154,10 +155,11 @@ const PropertiesPanel = () => {
             <label className="text-xs font-semibold text-gray-700">屏障類型 (Barrier Type)</label>
             <select 
               name="barrier_type" 
-              value={entityData.barrier_type || 'behavioral'} 
+              value={entityData.barrier_type || ''} 
               onChange={handleChange}
               className="border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all bg-white"
             >
+              <option value="" disabled>請選擇類型...</option>
               <option value="behavioral">行為控制 (Behavioral)</option>
               <option value="socio-technical">社會技術 (Socio-technical)</option>
               <option value="active-hardware">主動硬體 (Active-hardware)</option>

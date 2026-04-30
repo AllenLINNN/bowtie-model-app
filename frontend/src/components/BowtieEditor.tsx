@@ -7,6 +7,7 @@ import {
   useReactFlow,
   Connection,
   Edge,
+  MiniMap,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { v4 as uuidv4 } from 'uuid';
@@ -21,7 +22,7 @@ const nodeTypes = {
 
 const Editor = () => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
-  const { nodes, edges, onNodesChange, onEdgesChange, onConnect, setNodes, setSelectedLibraryItemId } = useStore();
+  const { nodes, edges, onNodesChange, onEdgesChange, onConnect, setNodes, setSelectedLibraryItemId, isMiniMapOpen } = useStore();
   const { screenToFlowPosition } = useReactFlow();
 
   const onDragOver = useCallback((event: React.DragEvent) => {
@@ -142,6 +143,7 @@ const Editor = () => {
       >
         <Background />
         <Controls />
+        {isMiniMapOpen && <MiniMap nodeStrokeWidth={3} zoomable pannable />}
         <Panel position="top-right" className="bg-white/80 p-2 rounded shadow text-xs text-gray-600">
           提示：拖曳節點並從左至右連線（威脅 &rarr; 頂端事件 &rarr; 後果）。
         </Panel>
