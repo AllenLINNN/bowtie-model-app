@@ -1,15 +1,16 @@
-import { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useStore } from '../store/useStore';
 import { format } from 'date-fns';
-import { FolderOpen, Plus, Trash2, ArchiveRestore, Archive, CheckCircle2, AlertTriangle, Search } from 'lucide-react';
+import { FolderOpen, Plus, Trash2, ArchiveRestore, Archive, CheckCircle2, AlertTriangle, Search, FileJson } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const Dashboard = () => {
-  const { projects, createProject, openProject, deleteProject, restoreProject, permanentlyDeleteProject } = useStore();
+  const { projects, createProject, openProject, deleteProject, restoreProject, permanentlyDeleteProject, importProjectJSON } = useStore();
   const [newProjectName, setNewProjectName] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [viewArchived, setViewArchived] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const activeProjects = projects
     .filter(p => !p.archived && p.name.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -20,6 +21,20 @@ const Dashboard = () => {
     .sort((a, b) => b.last_modified - a.last_modified);
     
   const totalArchivedCount = projects.filter(p => p.archived).length;
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      importProjectJSON(file);
+    }
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
@@ -233,18 +248,36 @@ const Dashboard = () => {
         
         <div className="flex flex-col md:flex-row gap-4 mb-10">
           {!viewArchived && (
-            <form onSubmit={handleCreate} className="bg-white p-2 rounded-xl shadow-sm border border-slate-200 flex gap-2 flex-grow">
+            <div className="bg-white p-2 rounded-xl shadow-sm border border-slate-200 flex gap-2 flex-grow">
+              <form onSubmit={handleCreate} className="flex gap-2 flex-grow">
+                <input 
+                  type="text" 
+                  value={newProjectName}
+                  onChange={(e) => setNewProjectName(e.target.value)}
+                  placeholder="輸入新專案名稱開始分析..." 
+                  className="flex-grow px-4 py-3 bg-transparent focus:outline-none text-slate-700 placeholder:text-slate-400"
+                />
+                <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2 transition-all shadow-sm hover:shadow shrink-0">
+                  <Plus size={18} /> 建立新專案
+                </button>
+              </form>
+              <div className="w-px h-8 bg-slate-200 my-auto mx-1 shrink-0"></div>
               <input 
-                type="text" 
-                value={newProjectName}
-                onChange={(e) => setNewProjectName(e.target.value)}
-                placeholder="輸入新專案名稱開始分析..." 
-                className="flex-grow px-4 py-3 bg-transparent focus:outline-none text-slate-700 placeholder:text-slate-400"
+                type="file" 
+                accept=".json" 
+                className="hidden" 
+                ref={fileInputRef} 
+                onChange={handleFileChange} 
               />
-              <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2 transition-all shadow-sm hover:shadow shrink-0">
-                <Plus size={18} /> 建立新專案
+              <button 
+                type="button" 
+                onClick={handleImportClick} 
+                className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-3 rounded-lg font-medium flex items-center gap-2 transition-all shadow-sm hover:shadow shrink-0" 
+                title="匯入單一專案 JSON (.json 檔案)"
+              >
+                <FileJson size={18} /> 匯入專案
               </button>
-            </form>
+            </div>
           )}
 
           <div className={`bg-white p-2 rounded-xl shadow-sm border border-slate-200 flex items-center gap-2 ${viewArchived ? 'w-full' : 'w-full md:w-1/3'}`}>
