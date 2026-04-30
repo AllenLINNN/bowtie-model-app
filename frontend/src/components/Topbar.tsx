@@ -206,8 +206,8 @@ const Topbar = () => {
             ref={fileInputRef} 
             onChange={handleFileChange} 
           />
-          <button onClick={handleImportClick} className="btn-action" title="匯入工作區">
-            <FileUp size={16} /> <span className="text-sm">匯入工作區 JSON</span>
+          <button onClick={handleImportClick} className="btn-action" title={activeProjectId ? "匯入單一專案" : "匯入工作區"}>
+            <FileUp size={16} /> <span className="text-sm">{activeProjectId ? "匯入單一專案" : "匯入工作區 JSON"}</span>
           </button>
           
           <button 
