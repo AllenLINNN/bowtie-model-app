@@ -139,6 +139,7 @@ const Editor = () => {
         defaultEdgeOptions={defaultEdgeOptions}
         onPaneClick={() => setSelectedLibraryItemId(null)}
         onNodeClick={() => setSelectedLibraryItemId(null)}
+        colorMode="system"
         fitView
       >
         <Background />
