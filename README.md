@@ -1,6 +1,6 @@
 # Bowtie App Prototype
 
-**網址：[https://allenlinnn.github.io/](https://allenlinnn.github.io/)**
+**網址：[https://allenlinnn.github.io/bowtie-model-app/](https://allenlinnn.github.io/bowtie-model-app/)**
 
 ## 核心功能
 
