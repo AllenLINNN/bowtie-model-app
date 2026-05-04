@@ -76,10 +76,10 @@ const Topbar = () => {
     const viewport = getViewportForBounds(nodesBounds, width, height, 0.5, 2, 0.1);
 
     const dataUrl = await toPng(element, {
-      backgroundColor: isTransparent ? 'transparent' : '#ffffff', // Use transparent for PNG, white for PDF
+      backgroundColor: isTransparent ? 'transparent' : (document.documentElement.classList.contains('dark') ? '#0f172a' : '#ffffff'),
       width: width,
       height: height,
-      pixelRatio: 3, // Boost resolution by 3x for crisp output
+      pixelRatio: 3, 
       style: {
         width: `${width}px`,
         height: `${height}px`,
@@ -93,7 +93,7 @@ const Topbar = () => {
   const exportPNG = async () => {
     const loadingToast = toast.loading('正在輸出 PNG...');
     try {
-      const result = await getPreciseViewportDataUrl(true); // Pass true for transparent PNG
+      const result = await getPreciseViewportDataUrl(true); 
       if (result) {
         downloadImage(result.dataUrl, `bowtie-${new Date().getTime()}.png`);
         toast.success('PNG 輸出成功！', { id: loadingToast });
@@ -108,7 +108,7 @@ const Topbar = () => {
   const exportPDF = async () => {
     const loadingToast = toast.loading('正在輸出 PDF...');
     try {
-      const result = await getPreciseViewportDataUrl(false); // Pass false for white background PDF
+      const result = await getPreciseViewportDataUrl(false); 
       if (!result) {
         toast.error('畫布上沒有節點可以輸出', { id: loadingToast });
         return;
@@ -143,20 +143,20 @@ const Topbar = () => {
   };
 
   return (
-    <header className="h-14 bg-white border-b border-gray-200 px-4 flex items-center justify-between shrink-0 shadow-sm z-10">
+    <header className="h-14 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-gray-800 px-4 flex items-center justify-between shrink-0 shadow-sm z-10">
       <div className="flex items-center gap-4">
         {activeProjectId ? (
           <div className="flex items-center gap-2 mr-2">
             <button 
               onClick={() => openProject(null)} 
-              className="flex items-center text-gray-500 hover:text-gray-800 transition-colors"
+              className="flex items-center text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
               title="返回專案列表"
             >
               <ArrowLeft size={20} />
             </button>
             <button 
               onClick={toggleSidebar} 
-              className="flex items-center text-gray-400 hover:text-blue-600 transition-colors"
+              className="flex items-center text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
               title={isSidebarOpen ? "收起左側面板" : "展開左側面板"}
             >
               {isSidebarOpen ? <PanelLeftClose size={20} /> : <PanelLeft size={20} />}
@@ -172,20 +172,20 @@ const Topbar = () => {
             onChange={(e) => setEditNameValue(e.target.value)} 
             onKeyDown={handleNameKeyDown}
             onBlur={handleNameSave}
-            className="border border-blue-400 rounded px-2 py-1 text-xl font-bold text-gray-800 focus:outline-none w-64"
+            className="border border-blue-400 dark:border-blue-500 rounded px-2 py-1 text-xl font-bold text-gray-800 dark:text-gray-100 bg-white dark:bg-slate-800 focus:outline-none w-64"
           />
         ) : (
           <div className="flex items-center gap-2 group cursor-pointer" onClick={handleEditNameClick}>
-            <h1 className="font-bold text-xl text-gray-800">
+            <h1 className="font-bold text-xl text-gray-800 dark:text-gray-100">
               {currentProject ? currentProject.name : 'Bowtie App 專案總覽'}
             </h1>
             {currentProject && (
-              <Edit2 size={16} className="text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <Edit2 size={16} className="text-gray-400 dark:text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity" />
             )}
           </div>
         )}
         
-        <div className="flex items-center gap-2 bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs font-semibold">
+        <div className="flex items-center gap-2 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-500 px-2 py-1 rounded text-xs font-semibold border border-yellow-200 dark:border-yellow-900/50">
           <WifiOff size={14} />
           本機離線模式
         </div>
@@ -193,7 +193,7 @@ const Topbar = () => {
 
       <div className="flex items-center gap-6">
         {currentProject && (
-          <div className="text-xs text-gray-500 hidden md:block">
+          <div className="text-xs text-gray-500 dark:text-gray-400 hidden md:block">
             最後儲存時間: {format(currentProject.last_modified, 'HH:mm:ss')}
           </div>
         )}
@@ -228,28 +228,28 @@ const Topbar = () => {
           
           {activeProjectId && (
             <>
-              <div className="w-px h-6 bg-gray-300 mx-1"></div>
+              <div className="w-px h-6 bg-gray-300 dark:bg-gray-700 mx-1"></div>
               <button onClick={handleAutoLayout} className="btn-action" title="自動整理節點排列">
                 <LayoutTemplate size={16} /> <span className="text-sm hidden lg:inline">自動排版</span>
               </button>
-              <div className="w-px h-6 bg-gray-300 mx-1"></div>
+              <div className="w-px h-6 bg-gray-300 dark:bg-gray-700 mx-1"></div>
               <button onClick={exportPNG} className="btn-action" title="匯出為圖片">
                 <Image size={16} /> <span className="text-sm">PNG</span>
               </button>
               <button onClick={exportPDF} className="btn-action" title="匯出為PDF">
                 <FileText size={16} /> <span className="text-sm">PDF</span>
               </button>
-              <div className="w-px h-6 bg-gray-300 mx-1"></div>
+              <div className="w-px h-6 bg-gray-300 dark:bg-gray-700 mx-1"></div>
               <button 
                 onClick={toggleMiniMap} 
-                className={`flex items-center p-1.5 rounded transition-colors ${isMiniMapOpen ? 'text-blue-600 bg-blue-50 hover:bg-blue-100' : 'text-gray-400 hover:text-blue-600 hover:bg-gray-100'}`}
+                className={`flex items-center p-1.5 rounded transition-colors ${isMiniMapOpen ? 'text-blue-600 bg-blue-50 dark:bg-blue-500/20 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-slate-800'}`}
                 title={isMiniMapOpen ? "隱藏迷你地圖" : "顯示迷你地圖"}
               >
                 <Map size={20} />
               </button>
               <button 
                 onClick={togglePropertiesPanel} 
-                className={`flex items-center p-1.5 rounded transition-colors ${isPropertiesPanelOpen ? 'text-blue-600 bg-blue-50 hover:bg-blue-100' : 'text-gray-400 hover:text-blue-600 hover:bg-gray-100'}`}
+                className={`flex items-center p-1.5 rounded transition-colors ${isPropertiesPanelOpen ? 'text-blue-600 bg-blue-50 dark:bg-blue-500/20 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-slate-800'}`}
                 title={isPropertiesPanelOpen ? "收起右側屬性面板" : "展開右側屬性面板"}
               >
                 {isPropertiesPanelOpen ? <PanelRightClose size={20} /> : <PanelRight size={20} />}
@@ -267,12 +267,19 @@ const Topbar = () => {
           padding: 6px 10px;
           border-radius: 6px;
           color: #4b5563;
-          background-color: #f3f4f6;
+          background-color: transparent;
           transition: all 0.2s;
         }
+        .dark .btn-action {
+          color: #9ca3af;
+        }
         .btn-action:hover {
-          background-color: #e5e7eb;
+          background-color: #f3f4f6;
           color: #111827;
+        }
+        .dark .btn-action:hover {
+          background-color: #1e293b;
+          color: #f3f4f6;
         }
       `}</style>
     </header>
