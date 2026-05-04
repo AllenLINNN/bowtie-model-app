@@ -4,7 +4,7 @@ import path from 'path'
 
 export default defineConfig({
   plugins: [react()],
-  base: '/', // 根目錄網址 https://allenlinnn.github.io/
+  base: '/bowtie-model-app/', // 設定為新的 Repository 名稱
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

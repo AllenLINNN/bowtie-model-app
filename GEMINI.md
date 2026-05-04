@@ -25,7 +25,7 @@ To achieve a fully offline, serverless experience that can be hosted on GitHub P
    - Threat: Blue (`bg-blue-500`)
    - Consequence: Red (`bg-red-500`)
    - Barriers: Light Gray (`bg-gray-200`)
-5. **Deployment:** The project is deployed to GitHub Pages using a GitHub Actions workflow (`.github/workflows/deploy.yml`). It uses `base: '/'` for a User Page root deployment.
+5. **Deployment:** The project is deployed to GitHub Pages using a GitHub Actions workflow (`.github/workflows/deploy.yml`). It uses `base: '/bowtie-model-app/'` for a standard repository deployment.
 
 ## Key Files
 - `src/store/useStore.ts`: The central nervous system handling state, persistence, library management, and auto-coding logic.
