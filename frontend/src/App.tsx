@@ -16,12 +16,12 @@ function App() {
   }, [loadData]);
 
   if (isLoading) {
-    return <div className="w-screen h-screen flex items-center justify-center bg-gray-50 text-gray-500">Loading your workspace...</div>;
+    return <div className="w-screen h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-900 text-gray-500 dark:text-gray-400">Loading your workspace...</div>;
   }
 
   return (
     <ReactFlowProvider>
-      <div className="flex flex-col h-screen w-screen bg-gray-100 overflow-hidden">
+      <div className="flex flex-col h-screen w-screen bg-gray-100 dark:bg-slate-900 overflow-hidden">
         <Toaster position="bottom-right" />
         <Topbar />
         {activeProjectId ? (
