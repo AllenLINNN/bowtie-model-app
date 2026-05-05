@@ -185,9 +185,9 @@ const Topbar = () => {
           </div>
         )}
         
-        <div className="flex items-center gap-2 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-500 px-2 py-1 rounded text-xs font-semibold border border-yellow-200 dark:border-yellow-900/50">
-          <WifiOff size={14} />
-          本機離線模式
+        <div className="flex items-center gap-1.5 text-gray-400 dark:text-gray-500 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-slate-800/50 px-2 py-0.5 rounded text-[10px] font-medium tracking-wide">
+          <WifiOff size={12} />
+          local-first
         </div>
       </div>
 
