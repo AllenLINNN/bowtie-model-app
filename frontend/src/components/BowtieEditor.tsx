@@ -22,6 +22,7 @@ const nodeTypes = {
 
 const Editor = () => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
+  const lastToastTimeRef = useRef<number>(0);
   const { nodes, edges, onNodesChange, onEdgesChange, onConnect, setNodes, setSelectedLibraryItemId, isMiniMapOpen } = useStore();
   const { screenToFlowPosition } = useReactFlow();
 
