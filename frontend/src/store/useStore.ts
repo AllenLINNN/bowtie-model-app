@@ -344,7 +344,7 @@ export const useStore = create<AppState>((set, get) => ({
           return { 
             ...edge, 
             data: { ...edge.data, ...newData },
-            label: newData.label || edge.label
+            label: newData.label !== undefined ? newData.label : edge.label
           };
         }
         return edge;
