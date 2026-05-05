@@ -114,19 +114,24 @@ const Editor = () => {
     );
 
     if (!isValid) {
-      const errorMessages: Record<string, string> = {
-        hazard: '危害 (Hazard) 只能連接至「頂端事件」。',
-        threat: '威脅 (Threat) 只能連接至「預防性屏障」或「頂端事件」。',
-        preventive_barrier: '預防性屏障 只能連接至「其他的預防性屏障」或「頂端事件」。',
-        top_event: '頂端事件 (Top Event) 只能連接至「減緩性屏障」或「後果」。',
-        mitigative_barrier: '減緩性屏障 只能連接至「其他的減緩性屏障」或「後果」。',
-        consequence: '後果 (Consequence) 無法再往下連接至其他節點。'
-      };
-      
-      toast.error(`連線失敗！\n規則：${errorMessages[sType] || '不允許的連線。'}`, {
-        duration: 4000,
-        style: { maxWidth: '400px' }
-      });
+      const now = Date.now();
+      if (now - lastToastTimeRef.current > 30000) {
+        const errorMessages: Record<string, string> = {
+          hazard: '危害 (Hazard) 只能連接至「頂端事件」。',
+          threat: '威脅 (Threat) 只能連接至「預防性屏障」或「頂端事件」。',
+          preventive_barrier: '預防性屏障 只能連接至「其他的預防性屏障」或「頂端事件」。',
+          top_event: '頂端事件 (Top Event) 只能連接至「減緩性屏障」或「後果」。',
+          mitigative_barrier: '減緩性屏障 只能連接至「其他的減緩性屏障」或「後果」。',
+          consequence: '後果 (Consequence) 無法再往下連接至其他節點。'
+        };
+        
+        toast.error(`連線失敗！\n規則：${errorMessages[sType] || '不允許的連線。'}`, {
+          duration: 4000,
+          style: { maxWidth: '400px' }
+        });
+        
+        lastToastTimeRef.current = now;
+      }
     }
 
     return isValid;
