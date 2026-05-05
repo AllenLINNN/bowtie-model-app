@@ -206,7 +206,7 @@ const Topbar = () => {
             ref={fileInputRef} 
             onChange={handleFileChange} 
           />
-          <button onClick={handleImportClick} className="btn-action" title={activeProjectId ? "匯入單一專案" : "匯入工作區"}>
+          <button onClick={handleImportClick} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-gray-600 dark:text-gray-400 bg-transparent hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-gray-100 transition-colors" title={activeProjectId ? "匯入單一專案" : "匯入工作區"}>
             <FileUp size={16} /> <span className="text-sm">{activeProjectId ? "匯入單一專案" : "匯入工作區 JSON"}</span>
           </button>
           
@@ -220,7 +220,7 @@ const Topbar = () => {
                 toast.success('工作區已下載');
               }
             }} 
-            className="btn-action" 
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-gray-600 dark:text-gray-400 bg-transparent hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-gray-100 transition-colors" 
             title={activeProjectId ? "下載單一專案" : "下載工作區"}
           >
             <Download size={16} /> <span className="text-sm">{activeProjectId ? "下載單一專案" : "下載工作區 JSON"}</span>
@@ -229,14 +229,14 @@ const Topbar = () => {
           {activeProjectId && (
             <>
               <div className="w-px h-6 bg-gray-300 dark:bg-gray-700 mx-1"></div>
-              <button onClick={handleAutoLayout} className="btn-action" title="自動整理節點排列">
+              <button onClick={handleAutoLayout} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-gray-600 dark:text-gray-400 bg-transparent hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-gray-100 transition-colors" title="自動整理節點排列">
                 <LayoutTemplate size={16} /> <span className="text-sm hidden lg:inline">自動排版</span>
               </button>
               <div className="w-px h-6 bg-gray-300 dark:bg-gray-700 mx-1"></div>
-              <button onClick={exportPNG} className="btn-action" title="匯出為圖片">
+              <button onClick={exportPNG} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-gray-600 dark:text-gray-400 bg-transparent hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-gray-100 transition-colors" title="匯出為圖片">
                 <Image size={16} /> <span className="text-sm">PNG</span>
               </button>
-              <button onClick={exportPDF} className="btn-action" title="匯出為PDF">
+              <button onClick={exportPDF} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-gray-600 dark:text-gray-400 bg-transparent hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-gray-100 transition-colors" title="匯出為PDF">
                 <FileText size={16} /> <span className="text-sm">PDF</span>
               </button>
               <div className="w-px h-6 bg-gray-300 dark:bg-gray-700 mx-1"></div>
@@ -258,30 +258,6 @@ const Topbar = () => {
           )}
         </div>
       </div>
-      
-      <style>{`
-        .btn-action {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          padding: 6px 10px;
-          border-radius: 6px;
-          color: #4b5563;
-          background-color: transparent;
-          transition: all 0.2s;
-        }
-        .dark .btn-action {
-          color: #9ca3af;
-        }
-        .btn-action:hover {
-          background-color: #f3f4f6;
-          color: #111827;
-        }
-        .dark .btn-action:hover {
-          background-color: #1e293b;
-          color: #f3f4f6;
-        }
-      `}</style>
     </header>
   );
 };
