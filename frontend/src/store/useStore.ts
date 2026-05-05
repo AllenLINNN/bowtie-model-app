@@ -41,10 +41,18 @@ interface AppState {
   nodes: BowtieNode[];
   edges: Edge[];
 
+  // History State for Undo/Redo
+  pastStates: { nodes: BowtieNode[], edges: Edge[] }[];
+  futureStates: { nodes: BowtieNode[], edges: Edge[] }[];
+
   // Actions
   loadData: () => Promise<void>;
   saveData: () => Promise<void>;
+  generateNextCode: (type: NodeType) => string;
   peekNextCode: (type: NodeType) => string;
+  pushHistory: () => void;
+  undo: () => void;
+  redo: () => void;
   selectedLibraryItemId: string | null;
   setSelectedLibraryItemId: (id: string | null) => void;
   updateLibraryItem: (id: string, newData: Partial<LibraryItem>) => void;
@@ -64,6 +72,7 @@ interface AppState {
   setNodes: (nodes: BowtieNode[]) => void;
   setEdges: (edges: Edge[]) => void;
   updateNodeData: (nodeId: string, newData: any) => void;
+  updateEdgeData: (edgeId: string, newData: any) => void;
 
   // Library Actions
   addToLibrary: (item: Omit<LibraryItem, 'id' | 'created_at'>) => string;
@@ -92,6 +101,64 @@ export const useStore = create<AppState>((set, get) => ({
   toggleMiniMap: () => set((state) => ({ isMiniMapOpen: !state.isMiniMapOpen })),
   nodes: [],
   edges: [],
+  pastStates: [],
+  futureStates: [],
+
+  pushHistory: () => {
+    const { nodes, edges, pastStates } = get();
+    // Save up to 50 states
+    const newPast = [...pastStates, { nodes, edges }].slice(-50);
+    set({ pastStates: newPast, futureStates: [] });
+  },
+
+  undo: () => {
+    const { pastStates, futureStates, nodes, edges } = get();
+    if (pastStates.length === 0) return;
+    const previous = pastStates[pastStates.length - 1];
+    const newPast = pastStates.slice(0, -1);
+    set({
+      nodes: previous.nodes,
+      edges: previous.edges,
+      pastStates: newPast,
+      futureStates: [{ nodes, edges }, ...futureStates],
+    });
+    get().saveData();
+  },
+
+  redo: () => {
+    const { pastStates, futureStates, nodes, edges } = get();
+    if (futureStates.length === 0) return;
+    const next = futureStates[0];
+    const newFuture = futureStates.slice(1);
+    set({
+      nodes: next.nodes,
+      edges: next.edges,
+      pastStates: [...pastStates, { nodes, edges }],
+      futureStates: newFuture,
+    });
+    get().saveData();
+  },
+
+  generateNextCode: (type: NodeType) => {
+    const prefixes: Record<string, string> = {
+      hazard: 'H',
+      top_event: 'E',
+      threat: 'T',
+      preventive_barrier: 'PB',
+      mitigative_barrier: 'MB',
+      consequence: 'C'
+    };
+    const prefix = prefixes[type] || 'X';
+    const currentCount = get().counters[type] || 0;
+    const nextCount = currentCount + 1;
+    
+    set(state => ({
+      counters: { ...state.counters, [type]: nextCount }
+    }));
+    get().saveData();
+    
+    return `${prefix}-${nextCount.toString().padStart(3, '0')}`;
+  },
 
   loadData: async () => {
     try {
@@ -174,7 +241,7 @@ export const useStore = create<AppState>((set, get) => ({
     if (!id) {
       // Close project and go to dashboard
       get().saveData().then(() => {
-        set({ activeProjectId: null, nodes: [], edges: [] });
+        set({ activeProjectId: null, nodes: [], edges: [], pastStates: [], futureStates: [] });
       });
       return;
     }
@@ -184,7 +251,9 @@ export const useStore = create<AppState>((set, get) => ({
       set({
         activeProjectId: id,
         nodes: project.nodes || [],
-        edges: project.edges || []
+        edges: project.edges || [],
+        pastStates: [],
+        futureStates: []
       });
     }
   },
@@ -223,31 +292,39 @@ export const useStore = create<AppState>((set, get) => ({
   },
 
   onNodesChange: (changes: NodeChange<BowtieNode>[]) => {
+    const hasSignificantChange = changes.some(c => c.type === 'remove' || c.type === 'add');
+    if (hasSignificantChange) get().pushHistory();
     set({ nodes: applyNodeChanges(changes, get().nodes) as BowtieNode[] });
     get().saveData();
   },
 
   onEdgesChange: (changes: EdgeChange[]) => {
+    const hasSignificantChange = changes.some(c => c.type === 'remove' || c.type === 'add');
+    if (hasSignificantChange) get().pushHistory();
     set({ edges: applyEdgeChanges(changes, get().edges) });
     get().saveData();
   },
 
   onConnect: (connection: Connection) => {
+    get().pushHistory();
     set({ edges: addEdge(connection, get().edges) });
     get().saveData();
   },
 
   setNodes: (nodes) => {
+    get().pushHistory();
     set({ nodes });
     get().saveData();
   },
 
   setEdges: (edges) => {
+    get().pushHistory();
     set({ edges });
     get().saveData();
   },
 
   updateNodeData: (nodeId, newData) => {
+    get().pushHistory();
     set({
       nodes: get().nodes.map((node) => {
         if (node.id === nodeId) {
@@ -255,6 +332,23 @@ export const useStore = create<AppState>((set, get) => ({
         }
         return node;
       }),
+    });
+    get().saveData();
+  },
+
+  updateEdgeData: (edgeId: string, newData: any) => {
+    get().pushHistory();
+    set({
+      edges: get().edges.map((edge) => {
+        if (edge.id === edgeId) {
+          return { 
+            ...edge, 
+            data: { ...edge.data, ...newData },
+            label: newData.label || edge.label
+          };
+        }
+        return edge;
+      })
     });
     get().saveData();
   },

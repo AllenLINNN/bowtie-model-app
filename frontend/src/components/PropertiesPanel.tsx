@@ -4,14 +4,37 @@ import { Database } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const PropertiesPanel = () => {
-  const { nodes, updateNodeData, addToLibrary, selectedLibraryItemId, library, updateLibraryItem } = useStore();
+  const { nodes, edges, updateNodeData, updateEdgeData, addToLibrary, selectedLibraryItemId, library, updateLibraryItem } = useStore();
   const selectedNode = nodes.find((n) => n.selected);
+  const selectedEdge = edges.find((e) => e.selected);
   const selectedLibraryItem = library.find(item => item.id === selectedLibraryItemId);
 
-  if (!selectedNode && !selectedLibraryItem) {
+  if (!selectedNode && !selectedLibraryItem && !selectedEdge) {
     return (
       <aside className="w-80 border-l border-gray-200 dark:border-gray-800 bg-white dark:bg-slate-900 p-4 overflow-y-auto shrink-0 z-10 shadow-[-4px_0_15px_rgba(0,0,0,0.05)] dark:shadow-none">
-        <div className="text-gray-500 dark:text-gray-400 text-sm text-center mt-10">點擊畫布上的節點或左側資料庫項目來編輯屬性。</div>
+        <div className="text-gray-500 dark:text-gray-400 text-sm text-center mt-10">點擊畫布上的節點/連線或左側資料庫項目來編輯屬性。</div>
+      </aside>
+    );
+  }
+
+  if (selectedEdge) {
+    return (
+      <aside className="w-80 border-l border-gray-200 dark:border-gray-800 bg-white dark:bg-slate-900 p-4 overflow-y-auto flex flex-col gap-4 shrink-0 z-10 shadow-[-4px_0_15px_rgba(0,0,0,0.05)] dark:shadow-none text-slate-800 dark:text-slate-200">
+        <div className="flex justify-between items-start border-b border-gray-200 dark:border-gray-800 pb-2">
+          <h2 className="font-bold text-lg text-gray-800 dark:text-gray-100">
+            連線屬性 (Edge)
+          </h2>
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">失效機制 / 標籤 (Degradation Factor)</label>
+          <input 
+            type="text" 
+            value={selectedEdge.label as string || ''} 
+            onChange={(e) => updateEdgeData(selectedEdge.id, { label: e.target.value })} 
+            className="border border-gray-300 dark:border-slate-700 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 transition-all bg-white dark:bg-slate-800 dark:text-white"
+            placeholder="例如：人員疏忽、設備老化..."
+          />
+        </div>
       </aside>
     );
   }

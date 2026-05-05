@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { useStore } from '../store/useStore';
 import { format } from 'date-fns';
-import { Download, Image, FileText, WifiOff, ArrowLeft, Edit2, LayoutTemplate, PanelLeftClose, PanelLeft, PanelRightClose, PanelRight, FileUp, Map } from 'lucide-react';
+import { Download, Image, FileText, WifiOff, ArrowLeft, Edit2, LayoutTemplate, PanelLeftClose, PanelLeft, PanelRightClose, PanelRight, FileUp, Map, Undo2, Redo2 } from 'lucide-react';
 import { toPng } from 'html-to-image';
 import jsPDF from 'jspdf';
 import { useReactFlow, getNodesBounds, getViewportForBounds } from '@xyflow/react';
@@ -9,7 +9,7 @@ import { getLayoutedElements } from '../utils/layout';
 import toast from 'react-hot-toast';
 
 const Topbar = () => {
-  const { exportJSON, importJSON, exportProjectJSON, importProjectJSON, activeProjectId, projects, openProject, updateProjectName, nodes, edges, setNodes, setEdges, isSidebarOpen, isPropertiesPanelOpen, isMiniMapOpen, toggleSidebar, togglePropertiesPanel, toggleMiniMap } = useStore();
+  const { exportJSON, importJSON, exportProjectJSON, importProjectJSON, activeProjectId, projects, openProject, updateProjectName, nodes, edges, setNodes, setEdges, isSidebarOpen, isPropertiesPanelOpen, isMiniMapOpen, toggleSidebar, togglePropertiesPanel, toggleMiniMap, undo, redo, pastStates, futureStates } = useStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const reactFlowInstance = useReactFlow();
 
@@ -229,6 +229,12 @@ const Topbar = () => {
           {activeProjectId && (
             <>
               <div className="w-px h-6 bg-gray-300 dark:bg-gray-700 mx-1"></div>
+              <button onClick={undo} disabled={pastStates.length === 0} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-gray-600 dark:text-gray-400 bg-transparent hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" title="復原 (Undo)">
+                <Undo2 size={16} />
+              </button>
+              <button onClick={redo} disabled={futureStates.length === 0} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-gray-600 dark:text-gray-400 bg-transparent hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" title="重做 (Redo)">
+                <Redo2 size={16} />
+              </button>
               <button onClick={handleAutoLayout} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-gray-600 dark:text-gray-400 bg-transparent hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-gray-100 transition-colors" title="自動整理節點排列">
                 <LayoutTemplate size={16} /> <span className="text-sm hidden lg:inline">自動排版</span>
               </button>

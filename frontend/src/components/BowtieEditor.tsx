@@ -31,6 +31,10 @@ const Editor = () => {
     event.dataTransfer.dropEffect = 'move';
   }, []);
 
+  const onNodeDragStart = useCallback(() => {
+    useStore.getState().pushHistory();
+  }, []);
+
   const onDrop = useCallback(
     (event: React.DragEvent) => {
       event.preventDefault();
@@ -42,6 +46,8 @@ const Editor = () => {
       if (!templateType && !libraryId) {
         return;
       }
+
+      useStore.getState().pushHistory();
 
       const position = screenToFlowPosition({
         x: event.clientX,
@@ -65,8 +71,8 @@ const Editor = () => {
         };
       } else {
         // Blank template - generate auto-code
-        const { peekNextCode } = useStore.getState();
-        const autoCode = peekNextCode(templateType);
+        const { generateNextCode } = useStore.getState();
+        const autoCode = generateNextCode(templateType);
         
         newNodeData = {
           label: templateLabel,
@@ -157,6 +163,7 @@ const Editor = () => {
         defaultEdgeOptions={defaultEdgeOptions}
         onPaneClick={() => setSelectedLibraryItemId(null)}
         onNodeClick={() => setSelectedLibraryItemId(null)}
+        onNodeDragStart={onNodeDragStart}
         colorMode="system"
         fitView
       >
