@@ -14,7 +14,7 @@ export type ConditionalModifierType =
   | 'custom';
 
 export type BarrierEffectiveness = 'high' | 'medium' | 'low';
-export type AcceptabilityRating = 'acceptable' | 'alarp' | 'unacceptable';
+export type AcceptabilityRating = 'R1' | 'R2' | 'R3' | 'R4' | 'R5' | 'acceptable' | 'alarp' | 'unacceptable';
 export type ConsequenceCategory = 
   | 'fatality' | 'serious_injury' | 'minor_injury' 
   | 'property_damage' | 'service_disruption' | 'environmental';

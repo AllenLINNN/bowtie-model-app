@@ -24,42 +24,50 @@ localforage.config({
 
 const defaultRiskCriteria = (): RiskCriteria => ({
   id: uuidv4(),
-  name: '預設風險目標與矩陣定義',
+  name: '鐵路營運安全風險指標與矩陣定義',
   tmel_fatality: 1e-4,          // 致命事故 TMEL 上限：10^-4 次/年
   tmel_serious_injury: 1e-3,   // 重傷 TMEL 上限：10^-3 次/年
   tmel_minor_injury: 1e-2,     // 輕傷 TMEL 上限：10^-2 次/年
   tmel_property_damage: 1e-3,  // 財損 TMEL 上限：10^-3 次/年
   risk_matrix_config: {
     severity_levels: [
-      { level: 1, label: '可忽略', description: '無人員受傷，財產損失極低' },
-      { level: 2, label: '輕微', description: '人員輕傷，小規模財物損失' },
-      { level: 3, label: '中等', description: '人員受傷住院，中等財產損失' },
-      { level: 4, label: '嚴重', description: '人員重傷，重大財產與營運損失' },
-      { level: 5, label: '災難性', description: '人員死亡，災難性毀滅損失' }
+      { level: 1, label: '虛驚', description: '無人員受傷，鐵路行車無實質影響之異常事件' },
+      { level: 2, label: '延誤行車', description: '鐵路運轉受阻，行車受延誤之運轉異常事件' },
+      { level: 3, label: '財損', description: '造成設備或車輛損毀，中等財產損失' },
+      { level: 4, label: '受傷', description: '造成人員受傷（包含重傷或輕傷）' },
+      { level: 5, label: '死亡', description: '造成鐵路人員、旅客或民眾死亡' }
     ],
     likelihood_levels: [
-      { level: 1, label: '極不可能', description: '年頻率 <= 1e-5，幾乎不曾發生' },
-      { level: 2, label: '不可能', description: '年頻率 1e-4 到 1e-5，罕見發生' },
-      { level: 3, label: '可能', description: '年頻率 1e-3 到 1e-4，偶爾發生' },
-      { level: 4, label: '極可能', description: '年頻率 1e-2 到 1e-3，經常發生' },
-      { level: 5, label: '幾乎確定', description: '年頻率 >= 1e-1，持續發生' }
+      { level: 1, label: '幾乎不可能', description: '年頻率 <= 1e-5，在同類營運環境下極罕見' },
+      { level: 2, label: '不太可能', description: '年頻率 1e-4 到 1e-5，在營運壽期內少見發生' },
+      { level: 3, label: '可能', description: '年頻率 1e-3 到 1e-4，偶爾發生之事件' },
+      { level: 4, label: '極有可能', description: '年頻率 1e-2 到 1e-3，經常發生之運轉事件' },
+      { level: 5, label: '幾乎可確定', description: '年頻率 >= 1e-1，持續發生之常見運轉問題' }
     ],
     acceptability_matrix: [
       // 橫軸為 Severity (1-5)，縱軸為 Likelihood (1-5)
       // 對應的二維數組，這裡採用 [severity - 1][likelihood - 1] 結構映射
-      // row 0: Severity 1 (可忽略)
-      ['acceptable', 'acceptable', 'acceptable', 'acceptable', 'alarp'],
-      // row 1: Severity 2 (輕微)
-      ['acceptable', 'acceptable', 'acceptable', 'alarp', 'unacceptable'],
-      // row 2: Severity 3 (中等)
-      ['acceptable', 'acceptable', 'alarp', 'unacceptable', 'unacceptable'],
-      // row 3: Severity 4 (嚴重)
-      ['acceptable', 'alarp', 'unacceptable', 'unacceptable', 'unacceptable'],
-      // row 4: Severity 5 (災難性)
-      ['alarp', 'unacceptable', 'unacceptable', 'unacceptable', 'unacceptable']
+      // row 0: Severity 1 (虛驚)
+      ['R1', 'R1', 'R2', 'R3', 'R4'],
+      // row 1: Severity 2 (延誤行車)
+      ['R1', 'R2', 'R3', 'R4', 'R5'],
+      // row 2: Severity 3 (財損)
+      ['R2', 'R3', 'R4', 'R5', 'R5'],
+      // row 3: Severity 4 (受傷)
+      ['R4', 'R5', 'R5', 'R5', 'R5'],
+      // row 4: Severity 5 (死亡)
+      ['R5', 'R5', 'R5', 'R5', 'R5']
     ]
   }
 });
+
+const needsUpgradeCriteria = (criteria: any) => {
+  if (!criteria) return true;
+  const matrix = criteria.risk_matrix_config?.acceptability_matrix;
+  if (!matrix) return true;
+  // 檢查是否含有舊版的值 'acceptable' 或是 'alarp'
+  return matrix.some((row: any) => row.includes('acceptable') || row.includes('alarp'));
+};
 
 interface AppState {
   // Global State
@@ -306,12 +314,20 @@ export const useStore = create<AppState>((set, get) => ({
 
     const project = get().projects.find(p => p.id === id);
     if (project) {
+      let config = project.analysisConfig || null;
+      if (config && config.riskCriteria && needsUpgradeCriteria(config.riskCriteria)) {
+        config = {
+          ...config,
+          riskCriteria: defaultRiskCriteria(),
+          updated_at: Date.now()
+        };
+      }
       set({
         activeProjectId: id,
         nodes: project.nodes || [],
         edges: project.edges || [],
-        analysisConfig: project.analysisConfig || null,
-        isLopaEnabled: project.isLopaEnabled !== undefined ? project.isLopaEnabled : !!project.analysisConfig,
+        analysisConfig: config,
+        isLopaEnabled: project.isLopaEnabled !== undefined ? project.isLopaEnabled : !!config,
         activeTab: 'canvas',
         pastStates: [],
         futureStates: []

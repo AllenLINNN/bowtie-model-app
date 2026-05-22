@@ -118,7 +118,7 @@ const LopaTable = () => {
           <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
             LOPA 安全保護層與風險總覽報表
           </h2>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1.5 leading-relaxed">
             本專案共有 <span className="font-semibold text-blue-600 dark:text-blue-400">{scenarioPaths.length}</span> 個失效場景路徑。系統會根據您在畫布及屬性面板中定義的 PFD 與嚴重度指標，自動進行半定量/定量評估。
           </p>
         </div>
@@ -151,7 +151,7 @@ const LopaTable = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-gray-50/50 dark:bg-slate-800/40 text-gray-600 dark:text-gray-300 text-xs font-semibold border-b border-gray-200 dark:border-slate-800">
+                <tr className="bg-gray-50/50 dark:bg-slate-800/40 text-gray-600 dark:text-gray-300 text-sm font-semibold border-b border-gray-200 dark:border-slate-800">
                   <th className="py-4 px-4 w-24">編號</th>
                   <th className="py-4 px-4 min-w-[200px]">場景路徑拓撲</th>
                   <th className="py-4 px-4 w-32">IE 年頻率</th>
@@ -163,7 +163,7 @@ const LopaTable = () => {
                   <th className="py-4 px-4 w-32 text-center">操作</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-150 dark:divide-slate-800 text-xs">
+              <tbody className="divide-y divide-gray-150 dark:divide-slate-800 text-sm">
                 {scenarioPaths.map((path, idx) => {
                   const threatNode = nodes.find(n => n.id === path.threat_node_id);
                   const consequenceNode = nodes.find(n => n.id === path.consequence_node_id);
@@ -181,7 +181,7 @@ const LopaTable = () => {
                   const renderIPLCell = (barriers: typeof path.barriers) => {
                     const ipls = barriers.filter(b => b.is_ipl);
                     if (ipls.length === 0) {
-                      return <span className="text-gray-400 dark:text-gray-500 italic">無獨立保護層</span>;
+                      return <span className="text-gray-400 dark:text-gray-500 italic text-xs">無獨立保護層</span>;
                     }
                     return (
                       <div className="flex flex-col gap-1.5">
@@ -194,17 +194,17 @@ const LopaTable = () => {
                           return (
                             <div 
                               key={b.id} 
-                              className={`p-2 rounded-lg border ${
+                              className={`p-2 rounded-lg border text-xs ${
                                 isCompliant 
                                   ? 'bg-blue-50/50 dark:bg-blue-500/5 border-blue-200 dark:border-blue-500/20' 
                                   : 'bg-amber-50/50 dark:bg-amber-500/5 border-amber-200 dark:border-amber-500/20'
                               }`}
                             >
-                              <div className="flex justify-between items-center gap-1">
-                                <span className="font-semibold text-gray-700 dark:text-gray-300 truncate max-w-[120px]" title={`${code}: ${name}`}>
+                              <div className="flex justify-between items-center gap-2">
+                                <span className="font-semibold text-gray-750 dark:text-gray-300 truncate max-w-[140px]" title={`${code}: ${name}`}>
                                   {code}: {name}
                                 </span>
-                                <span className={`text-[10px] font-bold px-1 rounded ${
+                                <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${
                                   isCompliant 
                                     ? 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400' 
                                     : 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400'
@@ -213,8 +213,8 @@ const LopaTable = () => {
                                 </span>
                               </div>
                               {!isCompliant && (
-                                <div className="text-[9px] text-amber-600 dark:text-amber-400 flex items-center gap-0.5 mt-0.5" title="缺乏獨立性、有效性或可審核性，PFD 作為 1.0 (不減險) 計算">
-                                  <AlertTriangle size={10} />
+                                <div className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-0.5 mt-1" title="缺乏獨立性、有效性或可審核性，PFD 作為 1.0 (不減險) 計算">
+                                  <AlertTriangle size={11} />
                                   <span>未合規 IPL (不減險)</span>
                                 </div>
                               )}
@@ -237,18 +237,18 @@ const LopaTable = () => {
 
                       {/* 場景路徑拓撲 */}
                       <td className="py-4 px-4">
-                        <div className="flex flex-col gap-1">
+                        <div className="flex flex-col gap-1.5">
                           <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded font-bold">
+                            <span className="bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded font-bold text-xs">
                               {tCode}
                             </span>
-                            <span className="text-gray-400 dark:text-gray-600">➔</span>
-                            <span className="bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-300 px-1.5 py-0.5 rounded font-bold">
+                            <span className="text-gray-400 dark:text-gray-600 text-xs">➔</span>
+                            <span className="bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-300 px-1.5 py-0.5 rounded font-bold text-xs">
                               {cCode}
                             </span>
                           </div>
-                          <div className="text-[10px] text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
-                            <strong className="text-gray-700 dark:text-gray-300">{threatNode?.data?.label || '未命名威脅'}</strong>
+                          <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2 leading-relaxed">
+                            <strong className="text-gray-700 dark:text-gray-300 text-xs">{threatNode?.data?.label || '未命名威脅'}</strong>
                             <br />
                             導致 ➔ <span className="italic">{consequenceNode?.data?.label || '未命名後果'}</span>
                           </div>
@@ -259,17 +259,17 @@ const LopaTable = () => {
                       <td className="py-4 px-4 font-medium text-gray-700 dark:text-gray-300">
                         {path.initiating_event.input_mode === 'semi_quantitative' ? (
                           <div className="flex flex-col">
-                            <span className="font-bold">L-{path.initiating_event.semi_quant_level}</span>
-                            <span className="text-[10px] text-gray-400 dark:text-gray-500">
+                            <span className="font-bold text-sm">L-{path.initiating_event.semi_quant_level}</span>
+                            <span className="text-xs text-gray-450 dark:text-gray-500 mt-0.5">
                               (半定量模式)
                             </span>
                           </div>
                         ) : (
-                          <div className="flex flex-col">
-                            <span className="font-mono">
+                          <div className="flex flex-col gap-0.5">
+                            <span className="font-mono text-sm">
                               {path.initiating_event.frequency_per_year.toExponential(1)}
                             </span>
-                            <span className="text-[9px] text-gray-400 dark:text-gray-500">
+                            <span className="text-xs text-gray-450 dark:text-gray-500">
                               次/年
                             </span>
                           </div>
@@ -292,25 +292,25 @@ const LopaTable = () => {
                       </td>
 
                       {/* 最終頻率 */}
-                      <td className="py-4 px-4 text-right font-mono font-bold text-gray-800 dark:text-gray-200 relative group cursor-help">
-                        <div className="flex flex-col items-end">
+                      <td className="py-4 px-4 text-right font-mono font-bold text-gray-800 dark:text-gray-200 relative group cursor-help text-sm">
+                        <div className="flex flex-col items-end gap-0.5">
                           <span>{result?.consequence_frequency.toExponential(2)}</span>
-                          <span className="text-[9px] text-blue-500 dark:text-blue-400 border-b border-dashed border-blue-300 dark:border-blue-700">
+                          <span className="text-xs text-blue-500 dark:text-blue-400 border-b border-dashed border-blue-300 dark:border-blue-700">
                             檢視公式
                           </span>
                         </div>
                         
                         {/* 公式氣泡 Tooltip */}
                         {result?.formula_snapshot && (
-                          <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block z-20 w-80 bg-slate-950 text-slate-100 border border-slate-800 shadow-xl rounded-lg p-3 text-[10px] leading-relaxed backdrop-blur-md">
-                            <div className="font-semibold text-blue-400 border-b border-slate-800 pb-1 mb-1.5 flex items-center gap-1">
+                          <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block z-20 w-80 bg-slate-950 text-slate-100 border border-slate-800 shadow-xl rounded-lg p-3 text-xs leading-relaxed backdrop-blur-md">
+                            <div className="font-semibold text-blue-400 border-b border-slate-800 pb-1 mb-1.5 flex items-center gap-1 text-xs">
                               <Info size={12} />
                               <span>LOPA 計算公式快照</span>
                             </div>
-                            <code className="block bg-slate-900 p-1.5 rounded text-amber-300 break-all whitespace-pre-wrap font-mono">
+                            <code className="block bg-slate-900 p-1.5 rounded text-amber-300 break-all whitespace-pre-wrap font-mono text-xs">
                               {result.formula_snapshot}
                             </code>
-                            <div className="mt-2 text-slate-400 text-[9px]">
+                            <div className="mt-2 text-slate-400 text-xs">
                               IPL 合規驗證：PFD = 1.0 (若不合規)<br />
                               最終頻率 = IE 頻率 * 預防性 PFD * 緩和性 PFD * Modifiers
                             </div>
@@ -321,18 +321,18 @@ const LopaTable = () => {
                       {/* 符合安全目標 */}
                       <td className="py-4 px-4 text-center">
                         {result?.meets_criteria ? (
-                          <div className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-1 rounded-full font-bold">
+                          <div className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2.5 py-1 rounded-full font-bold text-xs">
                             <CheckCircle size={12} />
                             <span>合規</span>
                           </div>
                         ) : (
                           <div className="flex flex-col items-center gap-1">
-                            <div className="inline-flex items-center gap-1 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 px-2 py-1 rounded-full font-bold">
+                            <div className="inline-flex items-center gap-1 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 px-2.5 py-1 rounded-full font-bold text-xs">
                               <XCircle size={12} />
                               <span>超標</span>
                             </div>
                             {result?.risk_gap && (
-                              <span className="text-[10px] text-red-500 dark:text-red-400 font-bold">
+                              <span className="text-xs text-red-500 dark:text-red-400 font-bold">
                                 差 {result.risk_gap.toFixed(1)} 倍
                               </span>
                             )}
