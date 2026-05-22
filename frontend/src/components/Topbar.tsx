@@ -43,6 +43,7 @@ const Topbar = () => {
   const currentProject = projects.find(p => p.id === activeProjectId);
   const [isEditingName, setIsEditingName] = useState(false);
   const [editNameValue, setEditNameValue] = useState('');
+  const [isExportDropdownOpen, setIsExportDropdownOpen] = useState(false);
 
   const handleEditNameClick = () => {
     if (currentProject) {
@@ -206,11 +207,11 @@ const Topbar = () => {
           />
         ) : (
           <div className="flex items-center gap-2 group cursor-pointer" onClick={handleEditNameClick}>
-            <h1 className="font-bold text-xl text-gray-800 dark:text-gray-100">
+            <h1 className="font-bold text-xl text-gray-800 dark:text-gray-100 max-w-[140px] md:max-w-[200px] lg:max-w-[280px] truncate" title={currentProject ? currentProject.name : 'Bowtie App 專案總覽'}>
               {currentProject ? currentProject.name : 'Bowtie App 專案總覽'}
             </h1>
             {currentProject && (
-              <Edit2 size={16} className="text-gray-400 dark:text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <Edit2 size={16} className="text-gray-400 dark:text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
             )}
           </div>
         )}
@@ -218,36 +219,36 @@ const Topbar = () => {
 
       {/* 中間高質感 Tab 導覽按鈕 (當啟用 LOPA 時) */}
       {activeProjectId && isLopaEnabled && (
-        <div className="flex items-center bg-gray-100 dark:bg-slate-800/80 p-0.5 rounded-lg border border-gray-200 dark:border-slate-700/50 shadow-sm">
+        <div className="flex items-center bg-gray-100 dark:bg-slate-800/80 p-0.5 rounded-lg border border-gray-200 dark:border-slate-700/50 shadow-sm shrink-0 min-w-max">
           <button
             onClick={() => setActiveTab('canvas')}
-            className={`px-4 py-1 rounded-md text-xs font-semibold transition-all duration-200 ${
+            className={`px-3 py-1 rounded-md text-xs font-semibold transition-all duration-200 whitespace-nowrap shrink-0 ${
               activeTab === 'canvas'
                 ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm'
                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
             }`}
           >
-            畫布編輯
+            畫布<span className="hidden xl:inline">編輯</span>
           </button>
           <button
             onClick={() => setActiveTab('lopa_table')}
-            className={`px-4 py-1 rounded-md text-xs font-semibold transition-all duration-200 ${
+            className={`px-3 py-1 rounded-md text-xs font-semibold transition-all duration-200 whitespace-nowrap shrink-0 ${
               activeTab === 'lopa_table'
                 ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm'
                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
             }`}
           >
-            LOPA 分析報表
+            LOPA<span className="hidden xl:inline">分析報表</span>
           </button>
           <button
             onClick={() => setActiveTab('risk_matrix')}
-            className={`px-4 py-1 rounded-md text-xs font-semibold transition-all duration-200 ${
+            className={`px-3 py-1 rounded-md text-xs font-semibold transition-all duration-200 whitespace-nowrap shrink-0 ${
               activeTab === 'risk_matrix'
                 ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm'
                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
             }`}
           >
-            5x5 風險矩陣
+            <span className="hidden xl:inline">5x5 </span>風險矩陣
           </button>
         </div>
       )}
@@ -255,18 +256,18 @@ const Topbar = () => {
       {/* 右側操作按鈕 */}
       <div className="flex items-center gap-4 shrink-0">
         {currentProject && (
-          <div className="text-xs text-gray-500 dark:text-gray-400 hidden lg:block">
+          <div className="text-xs text-gray-500 dark:text-gray-400 hidden xl:block">
             最後儲存時間: {format(currentProject.last_modified, 'HH:mm:ss')}
           </div>
         )}
 
         {/* 啟用 LOPA Toggle */}
         {activeProjectId && (
-          <div className="flex items-center gap-2 pr-1 select-none">
-            <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">啟用 LOPA</span>
+          <div className="flex items-center gap-2 pr-1 select-none shrink-0">
+            <span className="text-xs font-semibold text-gray-600 dark:text-gray-400 hidden md:inline">啟用 LOPA</span>
             <button
               onClick={toggleLopaEnabled}
-              className={`w-9 h-5 flex items-center rounded-full p-0.5 transition-colors duration-300 ${
+              className={`w-9 h-5 flex items-center rounded-full p-0.5 transition-colors duration-300 shrink-0 ${
                 isLopaEnabled ? 'bg-blue-600 dark:bg-blue-500' : 'bg-gray-300 dark:bg-slate-700'
               }`}
               title={isLopaEnabled ? "關閉 LOPA 分析" : "開啟 LOPA 分析"}
@@ -288,8 +289,8 @@ const Topbar = () => {
             ref={fileInputRef} 
             onChange={handleFileChange} 
           />
-          <button onClick={handleImportClick} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-gray-600 dark:text-gray-400 bg-transparent hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-gray-100 transition-colors" title={activeProjectId ? "匯入單一專案" : "匯入工作區"}>
-            <FileUp size={16} /> <span className="text-sm hidden xl:inline">{activeProjectId ? "匯入單一專案" : "匯入工作區 JSON"}</span>
+          <button onClick={handleImportClick} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-gray-600 dark:text-gray-400 bg-transparent hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-gray-100 transition-colors shrink-0" title={activeProjectId ? "匯入單一專案" : "匯入工作區"}>
+            <FileUp size={16} /> <span className="text-sm hidden lg:inline">{activeProjectId ? "匯入單一專案" : "匯入工作區 JSON"}</span>
           </button>
           
           <button 
@@ -302,42 +303,72 @@ const Topbar = () => {
                 toast.success('工作區已下載');
               }
             }} 
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-gray-600 dark:text-gray-400 bg-transparent hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-gray-100 transition-colors" 
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-gray-600 dark:text-gray-400 bg-transparent hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-gray-100 transition-colors shrink-0" 
             title={activeProjectId ? "下載單一專案" : "下載工作區"}
           >
-            <Download size={16} /> <span className="text-sm hidden xl:inline">{activeProjectId ? "下載單一專案" : "下載工作區 JSON"}</span>
+            <Download size={16} /> <span className="text-sm hidden lg:inline">{activeProjectId ? "下載單一專案" : "下載工作區 JSON"}</span>
           </button>
           
           {activeProjectId && activeTab === 'canvas' && (
             <>
               <div className="w-px h-6 bg-gray-300 dark:bg-gray-700 mx-1"></div>
-              <button onClick={undo} disabled={pastStates.length === 0} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-gray-600 dark:text-gray-400 bg-transparent hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" title="復原 (Undo)">
+              <button onClick={undo} disabled={pastStates.length === 0} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-gray-600 dark:text-gray-400 bg-transparent hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0" title="復原 (Undo)">
                 <Undo2 size={16} />
               </button>
-              <button onClick={redo} disabled={futureStates.length === 0} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-gray-600 dark:text-gray-400 bg-transparent hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" title="重做 (Redo)">
+              <button onClick={redo} disabled={futureStates.length === 0} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-gray-600 dark:text-gray-400 bg-transparent hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0" title="重做 (Redo)">
                 <Redo2 size={16} />
               </button>
-              <button onClick={handleAutoLayout} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-gray-600 dark:text-gray-400 bg-transparent hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-gray-100 transition-colors" title="自動整理節點排列">
+              <button onClick={handleAutoLayout} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-gray-600 dark:text-gray-400 bg-transparent hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-gray-100 transition-colors shrink-0" title="自動整理節點排列">
                 <LayoutTemplate size={16} /> <span className="text-sm hidden lg:inline">自動排版</span>
               </button>
-              <div className="w-px h-6 bg-gray-300 dark:bg-gray-700 mx-1"></div>
-              <button onClick={exportPNG} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-gray-600 dark:text-gray-400 bg-transparent hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-gray-100 transition-colors" title="匯出為圖片">
-                <Image size={16} /> <span className="text-sm">PNG</span>
-              </button>
-              <button onClick={exportPDF} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-gray-600 dark:text-gray-400 bg-transparent hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-gray-100 transition-colors" title="匯出為PDF">
-                <FileText size={16} /> <span className="text-sm">PDF</span>
-              </button>
-              <div className="w-px h-6 bg-gray-300 dark:bg-gray-700 mx-1"></div>
+              <div className="w-px h-6 bg-gray-300 dark:bg-gray-700 mx-1 shrink-0"></div>
+              <div className="relative shrink-0">
+                <button 
+                  onClick={() => setIsExportDropdownOpen(!isExportDropdownOpen)} 
+                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md transition-colors shrink-0 ${
+                    isExportDropdownOpen 
+                      ? 'text-blue-600 bg-blue-50 dark:bg-blue-500/20 dark:text-blue-400 font-medium' 
+                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-gray-100'
+                  }`}
+                  title="匯出畫布為圖片或 PDF"
+                >
+                  <Download size={16} /> 
+                  <span className="text-sm hidden lg:inline">匯出</span>
+                </button>
+                
+                {isExportDropdownOpen && (
+                  <>
+                    <div className="fixed inset-0 z-20" onClick={() => setIsExportDropdownOpen(false)} />
+                    <div className="absolute right-0 mt-1 w-36 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg shadow-lg py-1 z-30 animate-in fade-in slide-in-from-top-1 duration-150">
+                      <button 
+                        onClick={() => { exportPNG(); setIsExportDropdownOpen(false); }} 
+                        className="w-full flex items-center gap-2 px-3 py-2 text-xs text-left text-gray-700 dark:text-gray-300 hover:bg-gray-150 dark:hover:bg-slate-700 transition-colors"
+                      >
+                        <Image size={14} className="text-gray-450 dark:text-gray-400" />
+                        <span>匯出為 PNG 圖片</span>
+                      </button>
+                      <button 
+                        onClick={() => { exportPDF(); setIsExportDropdownOpen(false); }} 
+                        className="w-full flex items-center gap-2 px-3 py-2 text-xs text-left text-gray-700 dark:text-gray-300 hover:bg-gray-150 dark:hover:bg-slate-700 transition-colors"
+                      >
+                        <FileText size={14} className="text-gray-450 dark:text-gray-400" />
+                        <span>匯出為 PDF 文件</span>
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+              <div className="w-px h-6 bg-gray-300 dark:bg-gray-700 mx-1 shrink-0"></div>
               <button 
                 onClick={toggleMiniMap} 
-                className={`flex items-center p-1.5 rounded transition-colors ${isMiniMapOpen ? 'text-blue-600 bg-blue-50 dark:bg-blue-500/20 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-slate-800'}`}
+                className={`flex items-center p-1.5 rounded transition-colors shrink-0 ${isMiniMapOpen ? 'text-blue-600 bg-blue-50 dark:bg-blue-500/20 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-slate-800'}`}
                 title={isMiniMapOpen ? "隱藏迷你地圖" : "顯示迷你地圖"}
               >
                 <Map size={20} />
               </button>
               <button 
                 onClick={togglePropertiesPanel} 
-                className={`flex items-center p-1.5 rounded transition-colors ${isPropertiesPanelOpen ? 'text-blue-600 bg-blue-50 dark:bg-blue-500/20 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-slate-800'}`}
+                className={`flex items-center p-1.5 rounded transition-colors shrink-0 ${isPropertiesPanelOpen ? 'text-blue-600 bg-blue-50 dark:bg-blue-500/20 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-slate-800'}`}
                 title={isPropertiesPanelOpen ? "收起右側屬性面板" : "展開右側屬性面板"}
               >
                 {isPropertiesPanelOpen ? <PanelRightClose size={20} /> : <PanelRight size={20} />}
