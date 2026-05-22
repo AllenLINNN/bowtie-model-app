@@ -461,21 +461,6 @@ const PropertiesPanel = () => {
       {isLopaEnabled && data.type === 'consequence' && (
         <div className="border-t border-gray-200 dark:border-gray-800 pt-4 flex flex-col gap-3">
           <h3 className="font-semibold text-sm text-blue-600 dark:text-blue-400">LOPA 安全後果設定</h3>
-          
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">安全後果類別 (TMEL Category)</label>
-            <select 
-              name="consequence_category" 
-              value={entityData.consequence_category || 'fatality'} 
-              onChange={handleChange}
-              className="border border-gray-300 dark:border-slate-700 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-slate-800 dark:text-white"
-            >
-              <option value="fatality">人員死亡 (Fatality) [TMEL: 10⁻⁴]</option>
-              <option value="serious_injury">人員重傷 (Serious Injury) [TMEL: 10⁻³]</option>
-              <option value="minor_injury">人員輕傷 (Minor Injury) [TMEL: 10⁻²]</option>
-              <option value="property_damage">重大財損 (Property Damage) [TMEL: 10⁻³]</option>
-            </select>
-          </div>
 
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">嚴重度等級 (Severity Level)</label>
@@ -484,8 +469,19 @@ const PropertiesPanel = () => {
               value={entityData.semi_quant_severity || 3} 
               onChange={(e) => {
                 const val = parseInt(e.target.value) || 3;
+                let mappedCategory = 'property_damage';
+                if (val === 5) mappedCategory = 'fatality';
+                else if (val === 4) mappedCategory = 'serious_injury';
+                else if (val === 3) mappedCategory = 'property_damage';
+                else if (val === 2) mappedCategory = 'minor_injury';
+                else if (val === 1) mappedCategory = 'none';
+
                 updateNodeData(selectedNode!.id, {
-                  entityData: { ...entityData, semi_quant_severity: val }
+                  entityData: { 
+                    ...entityData, 
+                    semi_quant_severity: val,
+                    consequence_category: mappedCategory
+                  }
                 });
               }}
               className="border border-gray-300 dark:border-slate-700 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-slate-800 dark:text-white"
@@ -496,6 +492,9 @@ const PropertiesPanel = () => {
               <option value={4}>等級 4 (受傷)</option>
               <option value={5}>等級 5 (死亡)</option>
             </select>
+            <div className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">
+              * 系統將自動判定安全後果類別與對應之安全目標頻率 (TMEL)
+            </div>
           </div>
         </div>
       )}

@@ -985,26 +985,34 @@ export const useStore = create<AppState>((set, get) => ({
       // 取得後果資訊與目標頻率 TMEL
       const consequenceNode = get().nodes.find(n => n.id === path.consequence_node_id);
       const consequenceEntityData = consequenceNode?.data?.entityData || {};
-      const category = consequenceEntityData.consequence_category || 'fatality';
+      
+      // 取得嚴重度與安全後果類別 (同時相容舊有資料與自動映射)
+      const severityLevel = consequenceEntityData.semi_quant_severity || 3;
+      const category = consequenceEntityData.consequence_category || 
+        (severityLevel === 1 ? 'none' : 
+         severityLevel === 2 ? 'minor_injury' : 
+         severityLevel === 3 ? 'property_damage' : 
+         severityLevel === 4 ? 'serious_injury' : 'fatality');
 
       let tmel: number | null = null;
       if (category === 'fatality') tmel = riskCriteria.tmel_fatality;
       else if (category === 'serious_injury') tmel = riskCriteria.tmel_serious_injury;
       else if (category === 'minor_injury') tmel = riskCriteria.tmel_minor_injury;
       else if (category === 'property_damage') tmel = riskCriteria.tmel_property_damage;
+      else if (category === 'none') tmel = null; // 虛驚無安全目標頻率限制
 
-      if (tmel === null) {
+      // 只有在非 'none' 且 tmel 依然為空時，才做 fallback 限制
+      if (tmel === null && category !== 'none') {
         tmel = riskCriteria.tmel_fatality || 1e-4;
       }
 
-      // 安全合規判定
-      const meetsCriteriaInitial = tmel !== null ? initialFrequency <= tmel : null;
-      const meetsCriteria = tmel !== null ? residualFrequency <= tmel : null;
+      // 安全合規判定 (無安全目標頻率限制時恆為合規)
+      const meetsCriteriaInitial = tmel !== null ? initialFrequency <= tmel : true;
+      const meetsCriteria = tmel !== null ? residualFrequency <= tmel : true;
       const riskGap = tmel !== null ? residualFrequency / tmel : null;
       const requiredAdditionalRrf = tmel !== null && residualFrequency > tmel ? residualFrequency / tmel : 0;
 
-      // 取得嚴重度與計算可能性等級
-      const severityLevel = consequenceEntityData.semi_quant_severity || 3;
+      // 計算可能性等級
       const initialLikelihoodLevel = frequencyToLikelihoodLevel(initialFrequency);
       const residualLikelihoodLevel = frequencyToLikelihoodLevel(residualFrequency);
 
