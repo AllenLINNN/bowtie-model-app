@@ -4,7 +4,7 @@ import { Database } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const PropertiesPanel = () => {
-  const { nodes, edges, updateNodeData, updateEdgeData, addToLibrary, selectedLibraryItemId, library, updateLibraryItem } = useStore();
+  const { nodes, edges, updateNodeData, updateEdgeData, addToLibrary, selectedLibraryItemId, library, updateLibraryItem, isLopaEnabled } = useStore();
   const selectedNode = nodes.find((n) => n.selected);
   const selectedEdge = edges.find((e) => e.selected);
   const selectedLibraryItem = library.find(item => item.id === selectedLibraryItemId);
@@ -213,6 +213,248 @@ const PropertiesPanel = () => {
             />
           </div>
         </>
+      )}
+
+      {isLopaEnabled && data.type === 'threat' && (
+        <div className="border-t border-gray-200 dark:border-gray-800 pt-4 flex flex-col gap-3">
+          <h3 className="font-semibold text-sm text-blue-600 dark:text-blue-400">LOPA 起始事件設定</h3>
+          
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">輸入模式 (Input Mode)</label>
+            <select 
+              name="input_mode" 
+              value={entityData.input_mode || 'semi_quantitative'} 
+              onChange={handleChange}
+              className="border border-gray-300 dark:border-slate-700 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-slate-800 dark:text-white"
+            >
+              <option value="semi_quantitative">半定量 (Semi-Quantitative)</option>
+              <option value="quantitative">定量 (Quantitative)</option>
+            </select>
+          </div>
+
+          {entityData.input_mode === 'quantitative' ? (
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">起始事件年頻率 (F_IE / Year)</label>
+              <input 
+                type="number" 
+                name="frequency_value" 
+                step="any"
+                value={entityData.frequency_value !== undefined ? entityData.frequency_value : 0.1} 
+                onChange={(e) => {
+                  const val = parseFloat(e.target.value) || 0;
+                  updateNodeData(selectedNode!.id, {
+                    entityData: { 
+                      ...entityData, 
+                      frequency_value: val,
+                      frequency_per_year: val
+                    }
+                  });
+                }}
+                className="border border-gray-300 dark:border-slate-700 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-slate-800 dark:text-white"
+                placeholder="例如：0.01"
+              />
+            </div>
+          ) : (
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">可能性等級 (Likelihood Level)</label>
+              <select 
+                name="semi_quant_likelihood" 
+                value={entityData.semi_quant_likelihood || 3} 
+                onChange={(e) => {
+                  const val = parseInt(e.target.value) || 3;
+                  updateNodeData(selectedNode!.id, {
+                    entityData: { 
+                      ...entityData, 
+                      semi_quant_likelihood: val
+                    }
+                  });
+                }}
+                className="border border-gray-300 dark:border-slate-700 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-slate-800 dark:text-white"
+              >
+                <option value={1}>{"等級 1 (極不可能 <= 10⁻⁵ / yr)"}</option>
+                <option value={2}>{"等級 2 (不可能 ~ 10⁻⁴ / yr)"}</option>
+                <option value={3}>{"等級 3 (可能 ~ 10⁻³ / yr)"}</option>
+                <option value={4}>{"等級 4 (極可能 ~ 10⁻² / yr)"}</option>
+                <option value={5}>{"等級 5 (幾乎確定 >= 10⁻¹ / yr)"}</option>
+              </select>
+            </div>
+          )}
+
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">數據來源 (Source)</label>
+            <input 
+              type="text" 
+              name="source" 
+              value={entityData.source || ''} 
+              onChange={handleChange}
+              className="border border-gray-300 dark:border-slate-700 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-slate-800 dark:text-white"
+              placeholder="e.g., OREDA, CCPS..."
+            />
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">數據置信度 (Confidence)</label>
+            <select 
+              name="confidence_level" 
+              value={entityData.confidence_level || 'medium'} 
+              onChange={handleChange}
+              className="border border-gray-300 dark:border-slate-700 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-slate-800 dark:text-white"
+            >
+              <option value="high">高 (High)</option>
+              <option value="medium">中 (Medium)</option>
+              <option value="low">低 (Low)</option>
+            </select>
+          </div>
+        </div>
+      )}
+
+      {isLopaEnabled && (data.type === 'preventive_barrier' || data.type === 'mitigative_barrier') && (
+        <div className="border-t border-gray-200 dark:border-gray-800 pt-4 flex flex-col gap-3">
+          <h3 className="font-semibold text-sm text-blue-600 dark:text-blue-400">LOPA 安全保護層 (IPL) 設定</h3>
+          
+          <div className="flex items-center justify-between">
+            <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">獨立保護層 (IPL) 屬性</label>
+            <button
+              onClick={() => {
+                updateNodeData(selectedNode!.id, {
+                  entityData: { ...entityData, is_ipl: !entityData.is_ipl }
+                });
+              }}
+              className={`px-3 py-1 text-xs rounded font-bold transition-colors ${entityData.is_ipl ? 'bg-emerald-500 text-white' : 'bg-gray-200 dark:bg-slate-800 text-gray-600 dark:text-gray-400'}`}
+            >
+              {entityData.is_ipl ? '已啟用 IPL' : '未啟用 IPL'}
+            </button>
+          </div>
+
+          {entityData.is_ipl && (
+            <>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">失效概率 (PFD / Probability of Failure)</label>
+                <input 
+                  type="number" 
+                  name="pfd" 
+                  step="any"
+                  min="0"
+                  max="1"
+                  value={entityData.pfd !== undefined ? entityData.pfd : 0.1} 
+                  onChange={(e) => {
+                    const p = parseFloat(e.target.value);
+                    const validP = isNaN(p) ? 0.1 : Math.max(0, Math.min(1, p));
+                    const rrfVal = validP > 0 ? 1 / validP : 10;
+                    updateNodeData(selectedNode!.id, {
+                      entityData: { ...entityData, pfd: validP, rrf: rrfVal }
+                    });
+                  }}
+                  className="border border-gray-300 dark:border-slate-700 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-slate-800 dark:text-white"
+                  placeholder="e.g., 0.01"
+                />
+                <span className="text-[10px] text-gray-500">
+                  對應減險因子 RRF: {entityData.rrf ? Math.round(entityData.rrf) : (entityData.pfd ? Math.round(1 / entityData.pfd) : 10)}
+                </span>
+              </div>
+
+              <div className="border border-gray-200 dark:border-slate-800 rounded p-2 bg-gray-50 dark:bg-slate-850/40 flex flex-col gap-2">
+                <span className="text-[10px] font-semibold text-gray-500">IPL 合規性指標 (必須全為是)：</span>
+                
+                <label className="flex items-center gap-2 cursor-pointer text-xs">
+                  <input 
+                    type="checkbox" 
+                    checked={entityData.is_independent !== false} 
+                    onChange={(e) => {
+                      updateNodeData(selectedNode!.id, {
+                        entityData: { ...entityData, is_independent: e.target.checked }
+                      });
+                    }}
+                    className="rounded text-blue-600 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-750"
+                  />
+                  <span>具備獨立性 (Independent)</span>
+                </label>
+
+                <label className="flex items-center gap-2 cursor-pointer text-xs">
+                  <input 
+                    type="checkbox" 
+                    checked={entityData.is_effective !== false} 
+                    onChange={(e) => {
+                      updateNodeData(selectedNode!.id, {
+                        entityData: { ...entityData, is_effective: e.target.checked }
+                      });
+                    }}
+                    className="rounded text-blue-600 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-750"
+                  />
+                  <span>具備有效性 (Effective)</span>
+                </label>
+
+                <label className="flex items-center gap-2 cursor-pointer text-xs">
+                  <input 
+                    type="checkbox" 
+                    checked={entityData.is_auditable !== false} 
+                    onChange={(e) => {
+                      updateNodeData(selectedNode!.id, {
+                        entityData: { ...entityData, is_auditable: e.target.checked }
+                      });
+                    }}
+                    className="rounded text-blue-600 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-750"
+                  />
+                  <span>具備可審計性 (Auditable)</span>
+                </label>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">PFD 數據依據 (PFD Basis)</label>
+                <input 
+                  type="text" 
+                  name="pfd_basis" 
+                  value={entityData.pfd_basis || ''} 
+                  onChange={handleChange}
+                  className="border border-gray-300 dark:border-slate-700 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-slate-800 dark:text-white"
+                  placeholder="e.g., 廠商數據、IEC 61508..."
+                />
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {isLopaEnabled && data.type === 'consequence' && (
+        <div className="border-t border-gray-200 dark:border-gray-800 pt-4 flex flex-col gap-3">
+          <h3 className="font-semibold text-sm text-blue-600 dark:text-blue-400">LOPA 安全後果設定</h3>
+          
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">安全後果類別 (TMEL Category)</label>
+            <select 
+              name="consequence_category" 
+              value={entityData.consequence_category || 'fatality'} 
+              onChange={handleChange}
+              className="border border-gray-300 dark:border-slate-700 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-slate-800 dark:text-white"
+            >
+              <option value="fatality">人員死亡 (Fatality) [TMEL: 10⁻⁴]</option>
+              <option value="serious_injury">人員重傷 (Serious Injury) [TMEL: 10⁻³]</option>
+              <option value="minor_injury">人員輕傷 (Minor Injury) [TMEL: 10⁻²]</option>
+              <option value="property_damage">重大財損 (Property Damage) [TMEL: 10⁻³]</option>
+            </select>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">嚴重度等級 (Severity Level)</label>
+            <select 
+              name="semi_quant_severity" 
+              value={entityData.semi_quant_severity || 3} 
+              onChange={(e) => {
+                const val = parseInt(e.target.value) || 3;
+                updateNodeData(selectedNode!.id, {
+                  entityData: { ...entityData, semi_quant_severity: val }
+                });
+              }}
+              className="border border-gray-300 dark:border-slate-700 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-slate-800 dark:text-white"
+            >
+              <option value={1}>等級 1 (可忽略，無受傷)</option>
+              <option value={2}>等級 2 (輕微，小財損)</option>
+              <option value={3}>等級 3 (中等，住院受傷)</option>
+              <option value={4}>等級 4 (嚴重，重大財損)</option>
+              <option value={5}>等級 5 (災難性，人員死亡)</option>
+            </select>
+          </div>
+        </div>
       )}
       
       <div className="text-[10px] text-gray-400 dark:text-gray-500 mt-auto pt-4 border-t border-gray-200 dark:border-gray-800 break-all font-mono">

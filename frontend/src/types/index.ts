@@ -55,5 +55,6 @@ export interface Project {
   edges: Edge[];
   archived?: boolean;
   analysisConfig?: LopaAnalysisConfig;
+  isLopaEnabled?: boolean;
 }
 

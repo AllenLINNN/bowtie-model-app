@@ -9,7 +9,34 @@ import { getLayoutedElements } from '../utils/layout';
 import toast from 'react-hot-toast';
 
 const Topbar = () => {
-  const { exportJSON, importJSON, exportProjectJSON, importProjectJSON, activeProjectId, projects, openProject, updateProjectName, nodes, edges, setNodes, setEdges, isSidebarOpen, isPropertiesPanelOpen, isMiniMapOpen, toggleSidebar, togglePropertiesPanel, toggleMiniMap, undo, redo, pastStates, futureStates } = useStore();
+  const { 
+    exportJSON, 
+    importJSON, 
+    exportProjectJSON, 
+    importProjectJSON, 
+    activeProjectId, 
+    projects, 
+    openProject, 
+    updateProjectName, 
+    nodes, 
+    edges, 
+    setNodes, 
+    setEdges, 
+    isSidebarOpen, 
+    isPropertiesPanelOpen, 
+    isMiniMapOpen, 
+    toggleSidebar, 
+    togglePropertiesPanel, 
+    toggleMiniMap, 
+    undo, 
+    redo, 
+    pastStates, 
+    futureStates,
+    isLopaEnabled,
+    toggleLopaEnabled,
+    activeTab,
+    setActiveTab
+  } = useStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const reactFlowInstance = useReactFlow();
 
@@ -144,7 +171,8 @@ const Topbar = () => {
 
   return (
     <header className="h-14 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-gray-800 px-4 flex items-center justify-between shrink-0 shadow-sm z-10">
-      <div className="flex items-center gap-4">
+      {/* 左側專案名稱與控制 */}
+      <div className="flex items-center gap-4 shrink-0">
         {activeProjectId ? (
           <div className="flex items-center gap-2 mr-2">
             <button 
@@ -154,13 +182,15 @@ const Topbar = () => {
             >
               <ArrowLeft size={20} />
             </button>
-            <button 
-              onClick={toggleSidebar} 
-              className="flex items-center text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-              title={isSidebarOpen ? "收起左側面板" : "展開左側面板"}
-            >
-              {isSidebarOpen ? <PanelLeftClose size={20} /> : <PanelLeft size={20} />}
-            </button>
+            {activeTab === 'canvas' && (
+              <button 
+                onClick={toggleSidebar} 
+                className="flex items-center text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                title={isSidebarOpen ? "收起左側面板" : "展開左側面板"}
+              >
+                {isSidebarOpen ? <PanelLeftClose size={20} /> : <PanelLeft size={20} />}
+              </button>
+            )}
           </div>
         ) : null}
         
@@ -191,10 +221,67 @@ const Topbar = () => {
         </div>
       </div>
 
-      <div className="flex items-center gap-6">
+      {/* 中間高質感 Tab 導覽按鈕 (當啟用 LOPA 時) */}
+      {activeProjectId && isLopaEnabled && (
+        <div className="flex items-center bg-gray-100 dark:bg-slate-800/80 p-0.5 rounded-lg border border-gray-200 dark:border-slate-700/50 shadow-sm">
+          <button
+            onClick={() => setActiveTab('canvas')}
+            className={`px-4 py-1 rounded-md text-xs font-semibold transition-all duration-200 ${
+              activeTab === 'canvas'
+                ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
+            }`}
+          >
+            畫布編輯
+          </button>
+          <button
+            onClick={() => setActiveTab('lopa_table')}
+            className={`px-4 py-1 rounded-md text-xs font-semibold transition-all duration-200 ${
+              activeTab === 'lopa_table'
+                ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
+            }`}
+          >
+            LOPA 分析報表
+          </button>
+          <button
+            onClick={() => setActiveTab('risk_matrix')}
+            className={`px-4 py-1 rounded-md text-xs font-semibold transition-all duration-200 ${
+              activeTab === 'risk_matrix'
+                ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
+            }`}
+          >
+            5x5 風險矩陣
+          </button>
+        </div>
+      )}
+
+      {/* 右側操作按鈕 */}
+      <div className="flex items-center gap-4 shrink-0">
         {currentProject && (
-          <div className="text-xs text-gray-500 dark:text-gray-400 hidden md:block">
+          <div className="text-xs text-gray-500 dark:text-gray-400 hidden lg:block">
             最後儲存時間: {format(currentProject.last_modified, 'HH:mm:ss')}
+          </div>
+        )}
+
+        {/* 啟用 LOPA Toggle */}
+        {activeProjectId && (
+          <div className="flex items-center gap-2 pr-1 select-none">
+            <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">啟用 LOPA</span>
+            <button
+              onClick={toggleLopaEnabled}
+              className={`w-9 h-5 flex items-center rounded-full p-0.5 transition-colors duration-300 ${
+                isLopaEnabled ? 'bg-blue-600 dark:bg-blue-500' : 'bg-gray-300 dark:bg-slate-700'
+              }`}
+              title={isLopaEnabled ? "關閉 LOPA 分析" : "開啟 LOPA 分析"}
+            >
+              <div
+                className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ${
+                  isLopaEnabled ? 'translate-x-4' : 'translate-x-0'
+                }`}
+              />
+            </button>
           </div>
         )}
         
@@ -226,7 +313,7 @@ const Topbar = () => {
             <Download size={16} /> <span className="text-sm">{activeProjectId ? "下載單一專案" : "下載工作區 JSON"}</span>
           </button>
           
-          {activeProjectId && (
+          {activeProjectId && activeTab === 'canvas' && (
             <>
               <div className="w-px h-6 bg-gray-300 dark:bg-gray-700 mx-1"></div>
               <button onClick={undo} disabled={pastStates.length === 0} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-gray-600 dark:text-gray-400 bg-transparent hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" title="復原 (Undo)">
