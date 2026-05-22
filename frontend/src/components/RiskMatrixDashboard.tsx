@@ -191,11 +191,11 @@ const RiskMatrixDashboard = () => {
             </div>
             
             {/* 縱軸 Likelihood 等級提示 */}
-            <div className="w-24 flex flex-col justify-around text-right text-sm font-semibold text-gray-500 dark:text-gray-400 select-none pl-2">
+            <div className="w-32 flex flex-col justify-around text-right text-sm font-semibold text-gray-500 dark:text-gray-400 select-none pl-2">
               {[5, 4, 3, 2, 1].map(lVal => {
                 const lLevel = likelihoodLevels.find(l => l.level === lVal);
                 return (
-                  <div key={lVal} className="truncate" title={`Level ${lVal}: ${lLevel?.label}`}>
+                  <div key={lVal} className="whitespace-nowrap" title={`Level ${lVal}: ${lLevel?.label}`}>
                     L-{lVal} {lLevel?.label}
                   </div>
                 );
