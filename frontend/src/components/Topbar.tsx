@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { useStore } from '../store/useStore';
 import { format } from 'date-fns';
-import { Download, Image, FileText, WifiOff, ArrowLeft, Edit2, LayoutTemplate, PanelLeftClose, PanelLeft, PanelRightClose, PanelRight, FileUp, Map, Undo2, Redo2 } from 'lucide-react';
+import { Download, Image, FileText, ArrowLeft, Edit2, LayoutTemplate, PanelLeftClose, PanelLeft, PanelRightClose, PanelRight, FileUp, Map, Undo2, Redo2 } from 'lucide-react';
 import { toPng } from 'html-to-image';
 import jsPDF from 'jspdf';
 import { useReactFlow, getNodesBounds, getViewportForBounds } from '@xyflow/react';
@@ -214,11 +214,6 @@ const Topbar = () => {
             )}
           </div>
         )}
-        
-        <div className="flex items-center gap-1.5 text-gray-400 dark:text-gray-500 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-slate-800/50 px-2 py-0.5 rounded text-[10px] font-medium tracking-wide">
-          <WifiOff size={12} />
-          local-first
-        </div>
       </div>
 
       {/* 中間高質感 Tab 導覽按鈕 (當啟用 LOPA 時) */}
@@ -294,7 +289,7 @@ const Topbar = () => {
             onChange={handleFileChange} 
           />
           <button onClick={handleImportClick} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-gray-600 dark:text-gray-400 bg-transparent hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-gray-100 transition-colors" title={activeProjectId ? "匯入單一專案" : "匯入工作區"}>
-            <FileUp size={16} /> <span className="text-sm">{activeProjectId ? "匯入單一專案" : "匯入工作區 JSON"}</span>
+            <FileUp size={16} /> <span className="text-sm hidden xl:inline">{activeProjectId ? "匯入單一專案" : "匯入工作區 JSON"}</span>
           </button>
           
           <button 
@@ -310,7 +305,7 @@ const Topbar = () => {
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-gray-600 dark:text-gray-400 bg-transparent hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-gray-100 transition-colors" 
             title={activeProjectId ? "下載單一專案" : "下載工作區"}
           >
-            <Download size={16} /> <span className="text-sm">{activeProjectId ? "下載單一專案" : "下載工作區 JSON"}</span>
+            <Download size={16} /> <span className="text-sm hidden xl:inline">{activeProjectId ? "下載單一專案" : "下載工作區 JSON"}</span>
           </button>
           
           {activeProjectId && activeTab === 'canvas' && (
