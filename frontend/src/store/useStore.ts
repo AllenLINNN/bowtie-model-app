@@ -13,7 +13,7 @@ import {
 } from '@xyflow/react';
 import localforage from 'localforage';
 import { BowtieNode, Project, LibraryItem, NodeType } from '../types';
-import { LopaAnalysisConfig, RiskCriteria, ScenarioPath } from '../types/lopa';
+import { LopaAnalysisConfig, RiskCriteria, ScenarioPath, InitiatingEvent, BarrierAnalysis } from '../types/lopa';
 import { v4 as uuidv4 } from 'uuid';
 import toast from 'react-hot-toast';
 
@@ -132,6 +132,8 @@ interface AppState {
   addScenarioPath: (path: ScenarioPath) => void;
   updateScenarioPath: (pathId: string, newData: Partial<ScenarioPath>) => void;
   removeScenarioPath: (pathId: string) => void;
+  syncScenarioPaths: () => void;
+  calculateLopa: () => void;
 }
 
 export const useStore = create<AppState>((set, get) => ({
@@ -346,32 +348,57 @@ export const useStore = create<AppState>((set, get) => ({
     const hasSignificantChange = changes.some(c => c.type === 'remove' || c.type === 'add');
     if (hasSignificantChange) get().pushHistory();
     set({ nodes: applyNodeChanges(changes, get().nodes) as BowtieNode[] });
-    get().saveData();
+    if (get().analysisConfig) {
+      get().syncScenarioPaths();
+      get().calculateLopa();
+    } else {
+      get().saveData();
+    }
   },
 
   onEdgesChange: (changes: EdgeChange[]) => {
     const hasSignificantChange = changes.some(c => c.type === 'remove' || c.type === 'add');
     if (hasSignificantChange) get().pushHistory();
     set({ edges: applyEdgeChanges(changes, get().edges) });
-    get().saveData();
+    if (get().analysisConfig) {
+      get().syncScenarioPaths();
+      get().calculateLopa();
+    } else {
+      get().saveData();
+    }
   },
 
   onConnect: (connection: Connection) => {
     get().pushHistory();
     set({ edges: addEdge(connection, get().edges) });
-    get().saveData();
+    if (get().analysisConfig) {
+      get().syncScenarioPaths();
+      get().calculateLopa();
+    } else {
+      get().saveData();
+    }
   },
 
   setNodes: (nodes) => {
     get().pushHistory();
     set({ nodes });
-    get().saveData();
+    if (get().analysisConfig) {
+      get().syncScenarioPaths();
+      get().calculateLopa();
+    } else {
+      get().saveData();
+    }
   },
 
   setEdges: (edges) => {
     get().pushHistory();
     set({ edges });
-    get().saveData();
+    if (get().analysisConfig) {
+      get().syncScenarioPaths();
+      get().calculateLopa();
+    } else {
+      get().saveData();
+    }
   },
 
   updateNodeData: (nodeId, newData) => {
@@ -379,12 +406,28 @@ export const useStore = create<AppState>((set, get) => ({
     set({
       nodes: get().nodes.map((node) => {
         if (node.id === nodeId) {
-          return { ...node, data: { ...node.data, ...newData } };
+          const updatedEntityData = newData.entityData 
+            ? { ...(node.data?.entityData || {}), ...newData.entityData }
+            : node.data?.entityData;
+
+          return { 
+            ...node, 
+            data: { 
+              ...node.data, 
+              ...newData,
+              ...(updatedEntityData ? { entityData: updatedEntityData } : {})
+            } 
+          };
         }
         return node;
       }),
     });
-    get().saveData();
+    if (get().analysisConfig) {
+      get().syncScenarioPaths();
+      get().calculateLopa();
+    } else {
+      get().saveData();
+    }
   },
 
   updateEdgeData: (edgeId: string, newData: any) => {
@@ -401,7 +444,12 @@ export const useStore = create<AppState>((set, get) => ({
         return edge;
       })
     });
-    get().saveData();
+    if (get().analysisConfig) {
+      get().syncScenarioPaths();
+      get().calculateLopa();
+    } else {
+      get().saveData();
+    }
   },
 
   addToLibrary: (item) => {
@@ -613,6 +661,337 @@ export const useStore = create<AppState>((set, get) => ({
     };
 
     set({ analysisConfig: updated });
+    get().saveData();
+  },
+
+  syncScenarioPaths: () => {
+    const nodes = get().nodes;
+    const edges = get().edges;
+    const currentConfig = get().analysisConfig;
+    if (!currentConfig) return;
+
+    const topEvent = nodes.find(n => n.type === 'top_event');
+    if (!topEvent) {
+      if (currentConfig.scenarioPaths.length > 0) {
+        set({
+          analysisConfig: {
+            ...currentConfig,
+            scenarioPaths: [],
+            updated_at: Date.now()
+          }
+        });
+        get().saveData();
+      }
+      return;
+    }
+
+    const threats = nodes.filter(n => n.type === 'threat');
+    const oldPaths = currentConfig.scenarioPaths || [];
+
+    const findPreventivePaths = (threatId: string, targetId: string): string[][] => {
+      const paths: string[][] = [];
+      const visited = new Set<string>();
+
+      const dfs = (currentId: string, currentPath: string[]) => {
+        if (currentId === targetId) {
+          paths.push([...currentPath]);
+          return;
+        }
+        if (visited.has(currentId)) return;
+        visited.add(currentId);
+
+        const outboundEdges = edges.filter(e => e.source === currentId);
+        for (const edge of outboundEdges) {
+          const nextNode = nodes.find(n => n.id === edge.target);
+          if (!nextNode) continue;
+
+          if (nextNode.id === targetId) {
+            dfs(nextNode.id, currentPath);
+          } else if (nextNode.type === 'preventive_barrier') {
+            dfs(nextNode.id, [...currentPath, nextNode.id]);
+          }
+        }
+
+        visited.delete(currentId);
+      };
+
+      dfs(threatId, []);
+      return paths;
+    };
+
+    interface MitigativePath {
+      barrierIds: string[];
+      consequenceId: string;
+    }
+
+    const findMitigativePaths = (startId: string): MitigativePath[] => {
+      const paths: MitigativePath[] = [];
+      const visited = new Set<string>();
+
+      const dfs = (currentId: string, currentPath: string[]) => {
+        const currentNode = nodes.find(n => n.id === currentId);
+        if (!currentNode) return;
+
+        if (currentNode.type === 'consequence') {
+          paths.push({
+            barrierIds: currentPath,
+            consequenceId: currentId
+          });
+          return;
+        }
+        if (visited.has(currentId)) return;
+        visited.add(currentId);
+
+        const outboundEdges = edges.filter(e => e.source === currentId);
+        for (const edge of outboundEdges) {
+          const nextNode = nodes.find(n => n.id === edge.target);
+          if (!nextNode) continue;
+
+          if (nextNode.type === 'consequence') {
+            dfs(nextNode.id, currentPath);
+          } else if (nextNode.type === 'mitigative_barrier') {
+            dfs(nextNode.id, [...currentPath, nextNode.id]);
+          }
+        }
+
+        visited.delete(currentId);
+      };
+
+      dfs(startId, []);
+      return paths;
+    };
+
+    const newPaths: ScenarioPath[] = [];
+
+    for (const threat of threats) {
+      const prevPaths = findPreventivePaths(threat.id, topEvent.id);
+      const mitgPaths = findMitigativePaths(topEvent.id);
+
+      for (const pPath of prevPaths) {
+        for (const mPath of mitgPaths) {
+          const pbKeyStr = pPath.join('-');
+          const mbKeyStr = mPath.barrierIds.join('-');
+          const pathKey = `${threat.id}_${pbKeyStr}_${topEvent.id}_${mbKeyStr}_${mPath.consequenceId}`;
+
+          const oldPath = oldPaths.find(p => p.id === pathKey);
+          const newBarriers: BarrierAnalysis[] = [];
+
+          pPath.forEach((pbId, index) => {
+            const pbNode = nodes.find(n => n.id === pbId);
+            const pbEntityData = pbNode?.data?.entityData || {};
+            const oldBarrier = oldPath?.barriers.find(b => b.barrier_node_id === pbId && b.barrier_role === 'preventive');
+
+            const rawEff = oldBarrier?.semi_quant_effectiveness ?? pbEntityData.effectiveness;
+            const pbEffectiveness: 'high' | 'medium' | 'low' | null = 
+              (rawEff === 'high' || rawEff === 'medium' || rawEff === 'low') ? rawEff : 'medium';
+
+            newBarriers.push({
+              id: oldBarrier?.id || uuidv4(),
+              barrier_node_id: pbId,
+              barrier_role: 'preventive',
+              is_ipl: oldBarrier?.is_ipl ?? pbEntityData.default_is_ipl ?? false,
+              pfd: oldBarrier?.pfd ?? pbEntityData.default_pfd ?? 0.1,
+              rrf: oldBarrier?.rrf ?? (oldBarrier?.pfd ? 1 / oldBarrier.pfd : (pbEntityData.default_pfd ? 1 / pbEntityData.default_pfd : 10)),
+              pfd_basis: oldBarrier?.pfd_basis ?? '預設估計值',
+              is_independent: oldBarrier?.is_independent ?? true,
+              is_auditable: oldBarrier?.is_auditable ?? true,
+              is_effective: oldBarrier?.is_effective ?? true,
+              deficiency: oldBarrier?.deficiency ?? null,
+              semi_quant_effectiveness: pbEffectiveness,
+              order_in_path: index + 1,
+              notes: oldBarrier?.notes ?? ''
+            });
+          });
+
+          mPath.barrierIds.forEach((mbId, index) => {
+            const mbNode = nodes.find(n => n.id === mbId);
+            const mbEntityData = mbNode?.data?.entityData || {};
+            const oldBarrier = oldPath?.barriers.find(b => b.barrier_node_id === mbId && b.barrier_role === 'mitigative');
+
+            const rawEff = oldBarrier?.semi_quant_effectiveness ?? mbEntityData.effectiveness;
+            const mbEffectiveness: 'high' | 'medium' | 'low' | null = 
+              (rawEff === 'high' || rawEff === 'medium' || rawEff === 'low') ? rawEff : 'medium';
+
+            newBarriers.push({
+              id: oldBarrier?.id || uuidv4(),
+              barrier_node_id: mbId,
+              barrier_role: 'mitigative',
+              is_ipl: oldBarrier?.is_ipl ?? mbEntityData.default_is_ipl ?? false,
+              pfd: oldBarrier?.pfd ?? mbEntityData.default_pfd ?? 0.1,
+              rrf: oldBarrier?.rrf ?? (oldBarrier?.pfd ? 1 / oldBarrier.pfd : (mbEntityData.default_pfd ? 1 / mbEntityData.default_pfd : 10)),
+              pfd_basis: oldBarrier?.pfd_basis ?? '預設估計值',
+              is_independent: oldBarrier?.is_independent ?? true,
+              is_auditable: oldBarrier?.is_auditable ?? true,
+              is_effective: oldBarrier?.is_effective ?? true,
+              deficiency: oldBarrier?.deficiency ?? null,
+              semi_quant_effectiveness: mbEffectiveness,
+              order_in_path: index + 1,
+              notes: oldBarrier?.notes ?? ''
+            });
+          });
+
+          const threatEntityData = threat.data?.entityData || {};
+          const oldIE = oldPath?.initiating_event;
+
+          const initiatingEvent: InitiatingEvent = {
+            frequency_value: oldIE?.frequency_value ?? (threatEntityData.frequency_value ?? 0.1),
+            frequency_unit: oldIE?.frequency_unit ?? 'per_year',
+            frequency_per_year: oldIE?.frequency_per_year ?? (threatEntityData.frequency_per_year ?? 0.1),
+            semi_quant_level: oldIE?.semi_quant_level ?? (threatEntityData.semi_quant_likelihood ?? 3),
+            input_mode: oldIE?.input_mode ?? 'semi_quantitative',
+            source: oldIE?.source ?? '預設工藝安全設定',
+            confidence_level: oldIE?.confidence_level ?? 'medium',
+            reference: oldIE?.reference ?? ''
+          };
+
+          newPaths.push({
+            id: pathKey,
+            threat_node_id: threat.id,
+            top_event_node_id: topEvent.id,
+            consequence_node_id: mPath.consequenceId,
+            initiating_event: initiatingEvent,
+            barriers: newBarriers,
+            conditional_modifiers: oldPath?.conditional_modifiers ?? [],
+            calculation_result: oldPath?.calculation_result ?? null,
+            is_active: oldPath?.is_active ?? true,
+            created_at: oldPath?.created_at ?? Date.now(),
+            updated_at: Date.now(),
+            notes: oldPath?.notes ?? '',
+            audit_trail: oldPath?.audit_trail ?? []
+          });
+        }
+      }
+    }
+
+    set({
+      analysisConfig: {
+        ...currentConfig,
+        scenarioPaths: newPaths,
+        updated_at: Date.now()
+      }
+    });
+    get().saveData();
+  },
+
+  calculateLopa: () => {
+    const current = get().analysisConfig;
+    if (!current) return;
+
+    const riskCriteria = current.riskCriteria;
+    const semiQuantLikelihoodMap: Record<number, number> = {
+      5: 1e-1,
+      4: 1e-2,
+      3: 1e-3,
+      2: 1e-4,
+      1: 1e-5
+    };
+
+    const updatedPaths = current.scenarioPaths.map(path => {
+      let ieFrequency = path.initiating_event.frequency_per_year;
+      if (path.initiating_event.input_mode === 'semi_quantitative') {
+        const level = path.initiating_event.semi_quant_level || 3;
+        ieFrequency = semiQuantLikelihoodMap[level] || 1e-3;
+      }
+
+      const prevIPLs = path.barriers.filter(b => 
+        b.barrier_role === 'preventive' && 
+        b.is_ipl && 
+        b.is_effective && 
+        b.is_independent && 
+        b.pfd !== null
+      );
+      const prevPfdProduct = prevIPLs.reduce((prod, b) => prod * (b.pfd ?? 1), 1.0);
+
+      const mitigatedFrequency = ieFrequency * prevPfdProduct;
+
+      const mitgIPLs = path.barriers.filter(b => 
+        b.barrier_role === 'mitigative' && 
+        b.is_ipl && 
+        b.is_effective && 
+        b.is_independent && 
+        b.pfd !== null
+      );
+      const mitgPfdProduct = mitgIPLs.reduce((prod, b) => prod * (b.pfd ?? 1), 1.0);
+
+      const activeModifiers = path.conditional_modifiers.filter(m => m.is_active);
+      const modifierProduct = activeModifiers.reduce((prod, m) => prod * m.value, 1.0);
+
+      const consequenceFrequency = mitigatedFrequency * mitgPfdProduct * modifierProduct;
+
+      const consequenceNode = get().nodes.find(n => n.id === path.consequence_node_id);
+      const consequenceEntityData = consequenceNode?.data?.entityData || {};
+      const category = consequenceEntityData.consequence_category || 'fatality';
+
+      let tmel: number | null = null;
+      if (category === 'fatality') tmel = riskCriteria.tmel_fatality;
+      else if (category === 'serious_injury') tmel = riskCriteria.tmel_serious_injury;
+      else if (category === 'minor_injury') tmel = riskCriteria.tmel_minor_injury;
+      else if (category === 'property_damage') tmel = riskCriteria.tmel_property_damage;
+
+      if (tmel === null) {
+        tmel = riskCriteria.tmel_fatality || 1e-4;
+      }
+
+      let meetsCriteria: boolean | null = null;
+      let riskGap: number | null = null;
+      let requiredAdditionalRrf: number | null = null;
+
+      if (tmel !== null) {
+        meetsCriteria = consequenceFrequency <= tmel;
+        riskGap = consequenceFrequency / tmel;
+        requiredAdditionalRrf = consequenceFrequency > tmel ? consequenceFrequency / tmel : 0;
+      }
+
+      const threatNode = get().nodes.find(n => n.id === path.threat_node_id);
+      const threatEntityData = threatNode?.data?.entityData || {};
+      const likelihoodLevel = threatEntityData.semi_quant_likelihood || path.initiating_event.semi_quant_level || 3;
+      const severityLevel = consequenceEntityData.semi_quant_severity || 3;
+
+      const matrix = riskCriteria.risk_matrix_config.acceptability_matrix;
+      let acceptability: any = 'alarp';
+      try {
+        acceptability = matrix[severityLevel - 1][likelihoodLevel - 1] || 'alarp';
+      } catch (err) {
+        console.error("Matrix index out of bound", err);
+      }
+
+      const semiQuantRiskScore = {
+        severity_level: severityLevel as any,
+        likelihood_level: likelihoodLevel as any,
+        acceptability: acceptability
+      };
+
+      const iplCount = prevIPLs.length + mitgIPLs.length;
+
+      const calculationResult = {
+        calculated_at: Date.now(),
+        mitigated_event_frequency: mitigatedFrequency,
+        consequence_frequency: consequenceFrequency,
+        conditional_modified_frequency: consequenceFrequency,
+        tmel: tmel,
+        meets_criteria: meetsCriteria,
+        risk_gap: riskGap,
+        required_additional_rrf: requiredAdditionalRrf,
+        semi_quant_risk_score: semiQuantRiskScore,
+        ipl_count: iplCount,
+        calculation_mode: path.initiating_event.input_mode,
+        formula_snapshot: `F_consequence = F_IE (${ieFrequency.toExponential(2)}) * PB_PFD (${prevPfdProduct.toExponential(2)}) * MB_PFD (${mitgPfdProduct.toExponential(2)}) * CM (${modifierProduct.toExponential(2)})`
+      };
+
+      return {
+        ...path,
+        calculation_result: calculationResult,
+        updated_at: Date.now()
+      };
+    });
+
+    set({
+      analysisConfig: {
+        ...current,
+        scenarioPaths: updatedPaths,
+        updated_at: Date.now()
+      }
+    });
     get().saveData();
   }
 }));
