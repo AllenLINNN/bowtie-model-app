@@ -219,6 +219,20 @@ const PropertiesPanel = () => {
           </div>
 
           <div className="flex flex-col gap-1">
+            <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">控制措施類型 (Control Type)</label>
+            <select 
+              name="control_type" 
+              value={entityData.control_type || 'existing'} 
+              onChange={handleChange}
+              className="border border-gray-300 dark:border-slate-700 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 transition-all bg-white dark:bg-slate-800 dark:text-white"
+            >
+              <option value="existing">既有控制措施 (Existing Control)</option>
+              <option value="new">新增控制措施 (New Control)</option>
+              <option value="other">其他 (Other)</option>
+            </select>
+          </div>
+
+          <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">負責人 / 單位 (Owner)</label>
             <input 
               type="text" 
@@ -476,11 +490,11 @@ const PropertiesPanel = () => {
               }}
               className="border border-gray-300 dark:border-slate-700 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-slate-800 dark:text-white"
             >
-              <option value={1}>等級 1 (可忽略，無受傷)</option>
-              <option value={2}>等級 2 (輕微，小財損)</option>
-              <option value={3}>等級 3 (中等，住院受傷)</option>
-              <option value={4}>等級 4 (嚴重，重大財損)</option>
-              <option value={5}>等級 5 (災難性，人員死亡)</option>
+              <option value={1}>等級 1 (虛驚)</option>
+              <option value={2}>等級 2 (延誤行車)</option>
+              <option value={3}>等級 3 (財損)</option>
+              <option value={4}>等級 4 (受傷)</option>
+              <option value={5}>等級 5 (死亡)</option>
             </select>
           </div>
         </div>

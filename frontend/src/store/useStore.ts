@@ -823,6 +823,7 @@ export const useStore = create<AppState>((set, get) => ({
               deficiency: pbEntityData.deficiency !== undefined ? pbEntityData.deficiency : (oldBarrier?.deficiency ?? null),
               semi_quant_effectiveness: pbEffectiveness,
               order_in_path: index + 1,
+              control_type: pbEntityData.control_type !== undefined ? pbEntityData.control_type : (oldBarrier?.control_type ?? 'existing'),
               notes: pbEntityData.notes !== undefined ? pbEntityData.notes : (oldBarrier?.notes ?? '')
             });
           });
@@ -850,6 +851,7 @@ export const useStore = create<AppState>((set, get) => ({
               deficiency: mbEntityData.deficiency !== undefined ? mbEntityData.deficiency : (oldBarrier?.deficiency ?? null),
               semi_quant_effectiveness: mbEffectiveness,
               order_in_path: index + 1,
+              control_type: mbEntityData.control_type !== undefined ? mbEntityData.control_type : (oldBarrier?.control_type ?? 'existing'),
               notes: mbEntityData.notes !== undefined ? mbEntityData.notes : (oldBarrier?.notes ?? '')
             });
           });
@@ -910,6 +912,15 @@ export const useStore = create<AppState>((set, get) => ({
       1: 1e-5
     };
 
+    // 可能性頻率區間映射演算法 (符合國際標準 10⁻⁴ ~ 10⁻¹ 分級)
+    const frequencyToLikelihoodLevel = (freq: number): 1 | 2 | 3 | 4 | 5 => {
+      if (freq >= 1e-1) return 5;
+      if (freq >= 1e-2) return 4;
+      if (freq >= 1e-3) return 3;
+      if (freq >= 1e-4) return 2;
+      return 1;
+    };
+
     const updatedPaths = current.scenarioPaths.map(path => {
       let ieFrequency = path.initiating_event.frequency_per_year;
       if (path.initiating_event.input_mode === 'semi_quantitative') {
@@ -917,31 +928,61 @@ export const useStore = create<AppState>((set, get) => ({
         ieFrequency = semiQuantLikelihoodMap[level] || 1e-3;
       }
 
-      const prevIPLs = path.barriers.filter(b => 
+      // 條件修飾因子乘積
+      const activeModifiers = path.conditional_modifiers.filter(m => m.is_active);
+      const modifierProduct = activeModifiers.reduce((prod, m) => prod * m.value, 1.0);
+
+      // ==========================================
+      // 1. 初始風險計算 (僅包含 existing 控制措施)
+      // ==========================================
+      const initialPrevIPLs = path.barriers.filter(b => 
         b.barrier_role === 'preventive' && 
         b.is_ipl && 
         b.is_effective && 
         b.is_independent && 
-        b.pfd !== null
+        b.pfd !== null &&
+        (b.control_type === 'existing' || !b.control_type)
       );
-      const prevPfdProduct = prevIPLs.reduce((prod, b) => prod * (b.pfd ?? 1), 1.0);
+      const initialPrevPfdProduct = initialPrevIPLs.reduce((prod, b) => prod * (b.pfd ?? 1), 1.0);
+      const initialMitigatedFrequency = ieFrequency * initialPrevPfdProduct;
 
-      const mitigatedFrequency = ieFrequency * prevPfdProduct;
-
-      const mitgIPLs = path.barriers.filter(b => 
+      const initialMitgIPLs = path.barriers.filter(b => 
         b.barrier_role === 'mitigative' && 
         b.is_ipl && 
         b.is_effective && 
         b.is_independent && 
-        b.pfd !== null
+        b.pfd !== null &&
+        (b.control_type === 'existing' || !b.control_type)
       );
-      const mitgPfdProduct = mitgIPLs.reduce((prod, b) => prod * (b.pfd ?? 1), 1.0);
+      const initialMitgPfdProduct = initialMitgIPLs.reduce((prod, b) => prod * (b.pfd ?? 1), 1.0);
+      const initialFrequency = initialMitigatedFrequency * initialMitgPfdProduct * modifierProduct;
 
-      const activeModifiers = path.conditional_modifiers.filter(m => m.is_active);
-      const modifierProduct = activeModifiers.reduce((prod, m) => prod * m.value, 1.0);
+      // ==========================================
+      // 2. 殘餘風險計算 (包含 existing + new 控制措施)
+      // ==========================================
+      const residualPrevIPLs = path.barriers.filter(b => 
+        b.barrier_role === 'preventive' && 
+        b.is_ipl && 
+        b.is_effective && 
+        b.is_independent && 
+        b.pfd !== null &&
+        (b.control_type === 'existing' || b.control_type === 'new' || !b.control_type)
+      );
+      const residualPrevPfdProduct = residualPrevIPLs.reduce((prod, b) => prod * (b.pfd ?? 1), 1.0);
+      const residualMitigatedFrequency = ieFrequency * residualPrevPfdProduct;
 
-      const consequenceFrequency = mitigatedFrequency * mitgPfdProduct * modifierProduct;
+      const residualMitgIPLs = path.barriers.filter(b => 
+        b.barrier_role === 'mitigative' && 
+        b.is_ipl && 
+        b.is_effective && 
+        b.is_independent && 
+        b.pfd !== null &&
+        (b.control_type === 'existing' || b.control_type === 'new' || !b.control_type)
+      );
+      const residualMitgPfdProduct = residualMitgIPLs.reduce((prod, b) => prod * (b.pfd ?? 1), 1.0);
+      const residualFrequency = residualMitigatedFrequency * residualMitgPfdProduct * modifierProduct;
 
+      // 取得後果資訊與目標頻率 TMEL
       const consequenceNode = get().nodes.find(n => n.id === path.consequence_node_id);
       const consequenceEntityData = consequenceNode?.data?.entityData || {};
       const category = consequenceEntityData.consequence_category || 'fatality';
@@ -956,50 +997,63 @@ export const useStore = create<AppState>((set, get) => ({
         tmel = riskCriteria.tmel_fatality || 1e-4;
       }
 
-      let meetsCriteria: boolean | null = null;
-      let riskGap: number | null = null;
-      let requiredAdditionalRrf: number | null = null;
+      // 安全合規判定
+      const meetsCriteriaInitial = tmel !== null ? initialFrequency <= tmel : null;
+      const meetsCriteria = tmel !== null ? residualFrequency <= tmel : null;
+      const riskGap = tmel !== null ? residualFrequency / tmel : null;
+      const requiredAdditionalRrf = tmel !== null && residualFrequency > tmel ? residualFrequency / tmel : 0;
 
-      if (tmel !== null) {
-        meetsCriteria = consequenceFrequency <= tmel;
-        riskGap = consequenceFrequency / tmel;
-        requiredAdditionalRrf = consequenceFrequency > tmel ? consequenceFrequency / tmel : 0;
-      }
-
-      const threatNode = get().nodes.find(n => n.id === path.threat_node_id);
-      const threatEntityData = threatNode?.data?.entityData || {};
-      const likelihoodLevel = threatEntityData.semi_quant_likelihood || path.initiating_event.semi_quant_level || 3;
+      // 取得嚴重度與計算可能性等級
       const severityLevel = consequenceEntityData.semi_quant_severity || 3;
+      const initialLikelihoodLevel = frequencyToLikelihoodLevel(initialFrequency);
+      const residualLikelihoodLevel = frequencyToLikelihoodLevel(residualFrequency);
 
       const matrix = riskCriteria.risk_matrix_config.acceptability_matrix;
-      let acceptability: any = 'alarp';
+      let initialAcceptability: any = 'R5';
+      let residualAcceptability: any = 'R5';
       try {
-        acceptability = matrix[severityLevel - 1][likelihoodLevel - 1] || 'alarp';
+        initialAcceptability = matrix[severityLevel - 1][initialLikelihoodLevel - 1] || 'R5';
+        residualAcceptability = matrix[severityLevel - 1][residualLikelihoodLevel - 1] || 'R5';
       } catch (err) {
         console.error("Matrix index out of bound", err);
       }
 
-      const semiQuantRiskScore = {
+      const initialSemiQuantRiskScore = {
         severity_level: severityLevel as any,
-        likelihood_level: likelihoodLevel as any,
-        acceptability: acceptability
+        likelihood_level: initialLikelihoodLevel as any,
+        acceptability: initialAcceptability
       };
 
-      const iplCount = prevIPLs.length + mitgIPLs.length;
+      const semiQuantRiskScore = {
+        severity_level: severityLevel as any,
+        likelihood_level: residualLikelihoodLevel as any,
+        acceptability: residualAcceptability
+      };
+
+      const iplCount = residualPrevIPLs.length + residualMitgIPLs.length;
 
       const calculationResult = {
         calculated_at: Date.now(),
-        mitigated_event_frequency: mitigatedFrequency,
-        consequence_frequency: consequenceFrequency,
-        conditional_modified_frequency: consequenceFrequency,
+        mitigated_event_frequency: residualMitigatedFrequency,
+        consequence_frequency: residualFrequency, // 原本的殘餘後果頻率
+        conditional_modified_frequency: residualFrequency,
+        
+        initial_frequency: initialFrequency,
+        residual_frequency: residualFrequency,
+        
         tmel: tmel,
         meets_criteria: meetsCriteria,
+        meets_criteria_initial: meetsCriteriaInitial,
         risk_gap: riskGap,
         required_additional_rrf: requiredAdditionalRrf,
-        semi_quant_risk_score: semiQuantRiskScore,
+        
+        semi_quant_risk_score: semiQuantRiskScore, // 殘餘分數
+        initial_semi_quant_risk_score: initialSemiQuantRiskScore, // 初始分數
+        
         ipl_count: iplCount,
         calculation_mode: path.initiating_event.input_mode,
-        formula_snapshot: `F_consequence = F_IE (${ieFrequency.toExponential(2)}) * PB_PFD (${prevPfdProduct.toExponential(2)}) * MB_PFD (${mitgPfdProduct.toExponential(2)}) * CM (${modifierProduct.toExponential(2)})`
+        formula_snapshot: `F_consequence = F_IE (${ieFrequency.toExponential(2)}) * PB_PFD (${residualPrevPfdProduct.toExponential(2)}) * MB_PFD (${residualMitgPfdProduct.toExponential(2)}) * CM (${modifierProduct.toExponential(2)})`,
+        initial_formula_snapshot: `F_consequence = F_IE (${ieFrequency.toExponential(2)}) * PB_PFD (${initialPrevPfdProduct.toExponential(2)}) * MB_PFD (${initialMitgPfdProduct.toExponential(2)}) * CM (${modifierProduct.toExponential(2)})`
       };
 
       return {

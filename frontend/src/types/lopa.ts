@@ -84,6 +84,7 @@ export interface BarrierAnalysis {
   deficiency: BarrierDeficiency | null;
   semi_quant_effectiveness: BarrierEffectiveness | null;
   order_in_path: number;
+  control_type?: 'existing' | 'new' | 'other';
   notes?: string;
 }
 
@@ -108,14 +109,25 @@ export interface CalculationResult {
   mitigated_event_frequency: number;
   consequence_frequency: number;
   conditional_modified_frequency: number;
+  
+  // 雙階段詳細頻率與合規性
+  initial_frequency: number;
+  residual_frequency: number;
   tmel: number | null;
-  meets_criteria: boolean | null;
+  meets_criteria: boolean | null; // 殘餘是否合規
+  meets_criteria_initial: boolean | null; // 初始是否合規
+  
   risk_gap: number | null;
   required_additional_rrf: number | null;
-  semi_quant_risk_score: SemiQuantRiskScore | null;
+  
+  // 雙階段風險矩陣評分
+  semi_quant_risk_score: SemiQuantRiskScore | null; // 殘餘評分
+  initial_semi_quant_risk_score: SemiQuantRiskScore | null; // 初始評分
+  
   ipl_count: number;
   calculation_mode: 'quantitative' | 'semi_quantitative';
   formula_snapshot?: string;
+  initial_formula_snapshot?: string;
 }
 
 export interface AuditEntry {

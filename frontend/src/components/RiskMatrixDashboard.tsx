@@ -42,6 +42,9 @@ const RiskMatrixDashboard = () => {
   // 篩選狀態：null 代表顯示全部，或者是 { severity, likelihood } 代表選中的格子
   const [selectedCell, setSelectedCell] = useState<{ severity: number; likelihood: number } | null>(null);
 
+  // 雙階段風險檢視狀態
+  const [viewMode, setViewMode] = useState<'initial' | 'residual'>('residual');
+
   // 跳轉至畫布並聚焦該節點
   const handleJumpToCanvas = (threatNodeId: string) => {
     setNodes(
@@ -58,14 +61,17 @@ const RiskMatrixDashboard = () => {
     toast.success('已跳轉至畫布並選中對應威脅節點');
   };
 
-  // 取得特定格子的場景清單
+  // 取得特定格子的場景清單 (根據選定的檢視模式)
   const getScenariosInCell = (severity: number, likelihood: number) => {
     return scenarioPaths.filter(path => {
       const result = path.calculation_result;
-      if (!result?.semi_quant_risk_score) return false;
+      const score = viewMode === 'initial'
+        ? result?.initial_semi_quant_risk_score
+        : result?.semi_quant_risk_score;
+      if (!score) return false;
       return (
-        result.semi_quant_risk_score.severity_level === severity &&
-        result.semi_quant_risk_score.likelihood_level === likelihood
+        score.severity_level === severity &&
+        score.likelihood_level === likelihood
       );
     });
   };
@@ -111,20 +117,53 @@ const RiskMatrixDashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* 左側與中間：5x5 矩陣 */}
         <div className="lg:col-span-2 bg-white/70 dark:bg-slate-900/70 border border-gray-200 dark:border-slate-800 backdrop-blur-md rounded-xl p-6 shadow-sm flex flex-col justify-between">
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex flex-wrap justify-between items-center mb-6 gap-3">
             <h3 className="text-base font-bold text-gray-700 dark:text-gray-300 flex items-center gap-2">
               <Layers size={18} />
               5x5 鐵路安全風險判定熱圖
             </h3>
-            {selectedCell && (
-              <button
-                onClick={() => setSelectedCell(null)}
-                className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-semibold bg-blue-50 dark:bg-blue-500/10 px-3 py-2 rounded transition-all"
-              >
-                <RefreshCw size={13} />
-                顯示全部場景
-              </button>
-            )}
+
+            <div className="flex items-center gap-3">
+              {/* 藥丸形雙層風險檢視切換開關 */}
+              <div className="flex items-center bg-gray-150/70 dark:bg-slate-800/80 p-0.5 rounded-lg border border-gray-200/60 dark:border-slate-700/60 shadow-inner">
+                <button
+                  onClick={() => {
+                    setViewMode('initial');
+                    setSelectedCell(null);
+                  }}
+                  className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${
+                    viewMode === 'initial'
+                      ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-450 shadow-sm border border-gray-200/20'
+                      : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-slate-200'
+                  }`}
+                >
+                  初始風險 (僅既有措施)
+                </button>
+                <button
+                  onClick={() => {
+                    setViewMode('residual');
+                    setSelectedCell(null);
+                  }}
+                  className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${
+                    viewMode === 'residual'
+                      ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-450 shadow-sm border border-gray-200/20'
+                      : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-slate-200'
+                  }`}
+                >
+                  殘餘風險 (既有+新增)
+                </button>
+              </div>
+
+              {selectedCell && (
+                <button
+                  onClick={() => setSelectedCell(null)}
+                  className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-850 dark:text-blue-400 dark:hover:text-blue-300 font-bold bg-blue-50 dark:bg-blue-500/10 px-3 py-1.5 rounded-md transition-all border border-blue-100/60 dark:border-blue-900/20"
+                >
+                  <RefreshCw size={11} />
+                  顯示全部
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="flex flex-row items-stretch">
@@ -265,7 +304,12 @@ const RiskMatrixDashboard = () => {
               const threatNode = nodes.find(n => n.id === path.threat_node_id);
               const consequenceNode = nodes.find(n => n.id === path.consequence_node_id);
               const result = path.calculation_result;
-              const acceptability = result?.semi_quant_risk_score?.acceptability || 'R1';
+              
+              // 依據 viewMode 動態獲取評等分數與 acceptability
+              const score = viewMode === 'initial'
+                ? result?.initial_semi_quant_risk_score
+                : result?.semi_quant_risk_score;
+              const acceptability = score?.acceptability || 'R1';
               const style = getAcceptabilityStyle(acceptability, false);
 
               const tCode = threatNode?.data?.entityData?.code || 'T';
@@ -279,7 +323,7 @@ const RiskMatrixDashboard = () => {
                 >
                   <div className="space-y-2">
                     <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-1.5 flex-wrap">
                         <span className="bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded font-bold text-xs">
                           {tCode}
                         </span>
@@ -289,7 +333,7 @@ const RiskMatrixDashboard = () => {
                         </span>
                       </div>
                       <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${style.badge}`}>
-                        {isAcceptable ? '可接受' : '不可接受'}
+                        {isAcceptable ? '可接受' : '不可接受'} ({acceptability})
                       </span>
                     </div>
 
@@ -303,7 +347,16 @@ const RiskMatrixDashboard = () => {
                     </div>
                   </div>
 
-                  <div className="flex justify-between items-center border-t border-gray-100 dark:border-slate-800/80 pt-2 text-xs">
+                  <div className="flex flex-wrap justify-between items-end border-t border-gray-100 dark:border-slate-800/80 pt-2 text-xs gap-2">
+                    <div className="flex flex-col gap-1 text-gray-400 dark:text-gray-500">
+                      <div>
+                        嚴重度: <span className="font-bold text-gray-700 dark:text-gray-300">L-{score?.severity_level || 3}</span>
+                      </div>
+                      <div>
+                        {viewMode === 'initial' ? '初始可能性' : '殘餘可能性'}:{' '}
+                        <span className="font-bold text-gray-700 dark:text-gray-300">L-{score?.likelihood_level || 3}</span>
+                      </div>
+                    </div>
                     <div className="text-gray-400 dark:text-gray-500">
                       IPL 數量:{' '}
                       <span className="font-bold text-gray-700 dark:text-gray-300">

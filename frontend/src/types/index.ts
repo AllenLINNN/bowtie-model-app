@@ -24,6 +24,7 @@ export interface EntityData {
   consequence_category?: ConsequenceCategory;
   default_pfd?: number;
   default_is_ipl?: boolean;
+  control_type?: 'existing' | 'new' | 'other';
   [key: string]: any;
 }
 
