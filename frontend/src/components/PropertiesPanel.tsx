@@ -9,6 +9,23 @@ const PropertiesPanel = () => {
   const selectedEdge = edges.find((e) => e.selected);
   const selectedLibraryItem = library.find(item => item.id === selectedLibraryItemId);
 
+  const [localPfd, setLocalPfd] = React.useState<string>('0.1');
+
+  const currentPfdValue = React.useMemo(() => {
+    if (!selectedNode && !selectedLibraryItem) return undefined;
+    const isLib = !selectedNode && !!selectedLibraryItem;
+    const activeData = isLib ? selectedLibraryItem!.entityData : selectedNode!.data?.entityData;
+    return activeData?.pfd;
+  }, [selectedNode, selectedLibraryItem]);
+
+  React.useEffect(() => {
+    if (currentPfdValue !== undefined) {
+      setLocalPfd(currentPfdValue.toString());
+    } else {
+      setLocalPfd('0.1');
+    }
+  }, [selectedNode?.id, selectedLibraryItemId, currentPfdValue]);
+
   if (!selectedNode && !selectedLibraryItem && !selectedEdge) {
     return (
       <aside className="w-80 border-l border-gray-200 dark:border-gray-800 bg-white dark:bg-slate-900 p-4 overflow-y-auto shrink-0 z-10 shadow-[-4px_0_15px_rgba(0,0,0,0.05)] dark:shadow-none">
@@ -333,17 +350,29 @@ const PropertiesPanel = () => {
                 <input 
                   type="number" 
                   name="pfd" 
-                  step="any"
+                  step="0.01"
                   min="0"
                   max="1"
-                  value={entityData.pfd !== undefined ? entityData.pfd : 0.1} 
+                  value={localPfd} 
                   onChange={(e) => {
-                    const p = parseFloat(e.target.value);
-                    const validP = isNaN(p) ? 0.1 : Math.max(0, Math.min(1, p));
-                    const rrfVal = validP > 0 ? 1 / validP : 10;
-                    updateNodeData(selectedNode!.id, {
-                      entityData: { ...entityData, pfd: validP, rrf: rrfVal }
-                    });
+                    const strVal = e.target.value;
+                    setLocalPfd(strVal);
+                    
+                    const p = parseFloat(strVal);
+                    if (!isNaN(p)) {
+                      const validP = Math.max(0, Math.min(1, p));
+                      const rrfVal = validP > 0 ? 1 / validP : 10;
+                      
+                      if (isLibraryMode) {
+                        updateLibraryItem(selectedLibraryItem!.id, {
+                          entityData: { ...selectedLibraryItem!.entityData, pfd: validP, rrf: rrfVal }
+                        });
+                      } else {
+                        updateNodeData(selectedNode!.id, {
+                          entityData: { ...entityData, pfd: validP, rrf: rrfVal }
+                        });
+                      }
+                    }
                   }}
                   className="border border-gray-300 dark:border-slate-700 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-slate-800 dark:text-white"
                   placeholder="e.g., 0.01"

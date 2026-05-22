@@ -678,7 +678,7 @@ export const useStore = create<AppState>((set, get) => ({
     const currentConfig = get().analysisConfig;
     if (!currentConfig) return;
 
-    const topEvent = nodes.find(n => n.type === 'top_event');
+    const topEvent = nodes.find(n => n.data?.type === 'top_event');
     if (!topEvent) {
       if (currentConfig.scenarioPaths.length > 0) {
         set({
@@ -693,7 +693,7 @@ export const useStore = create<AppState>((set, get) => ({
       return;
     }
 
-    const threats = nodes.filter(n => n.type === 'threat');
+    const threats = nodes.filter(n => n.data?.type === 'threat');
     const oldPaths = currentConfig.scenarioPaths || [];
 
     const findPreventivePaths = (threatId: string, targetId: string): string[][] => {
@@ -715,7 +715,7 @@ export const useStore = create<AppState>((set, get) => ({
 
           if (nextNode.id === targetId) {
             dfs(nextNode.id, currentPath);
-          } else if (nextNode.type === 'preventive_barrier') {
+          } else if (nextNode.data?.type === 'preventive_barrier') {
             dfs(nextNode.id, [...currentPath, nextNode.id]);
           }
         }
@@ -740,7 +740,7 @@ export const useStore = create<AppState>((set, get) => ({
         const currentNode = nodes.find(n => n.id === currentId);
         if (!currentNode) return;
 
-        if (currentNode.type === 'consequence') {
+        if (currentNode.data?.type === 'consequence') {
           paths.push({
             barrierIds: currentPath,
             consequenceId: currentId
@@ -755,9 +755,9 @@ export const useStore = create<AppState>((set, get) => ({
           const nextNode = nodes.find(n => n.id === edge.target);
           if (!nextNode) continue;
 
-          if (nextNode.type === 'consequence') {
+          if (nextNode.data?.type === 'consequence') {
             dfs(nextNode.id, currentPath);
-          } else if (nextNode.type === 'mitigative_barrier') {
+          } else if (nextNode.data?.type === 'mitigative_barrier') {
             dfs(nextNode.id, [...currentPath, nextNode.id]);
           }
         }
