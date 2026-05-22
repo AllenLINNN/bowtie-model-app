@@ -105,10 +105,10 @@ const RiskMatrixDashboard = () => {
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       {/* 頂部說明區塊 */}
       <div className="bg-white/70 dark:bg-slate-900/70 border border-gray-200 dark:border-slate-800 backdrop-blur-md shadow-sm rounded-xl p-6 transition-all">
-        <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
           5x5 風險矩陣與安全評估 Dashboard
         </h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 leading-relaxed">
+        <p className="text-base text-gray-500 dark:text-gray-400 mt-2 leading-relaxed">
           本矩陣基於半定量評估，預設保全對象為<span className="font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/30 px-1.5 py-0.5 rounded">鐵路營運安全</span>，結合威脅的可能性等級 (Likelihood) 與後果的嚴重度等級 (Severity)，落入紅、綠雙色風險判定區域。
           您可<span className="font-semibold text-blue-600 dark:text-blue-400">點擊矩陣格子</span>來篩選與聚焦對應的風險場景。
         </p>
@@ -169,7 +169,7 @@ const RiskMatrixDashboard = () => {
           <div className="flex flex-row items-stretch">
             {/* 縱軸 Likelihood 標題 */}
             <div className="w-12 flex flex-col justify-around items-center select-none mr-2">
-              <span className="text-sm font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest -rotate-90 origin-center whitespace-nowrap">
+              <span className="text-base font-extrabold text-gray-400 dark:text-gray-500 uppercase tracking-widest -rotate-90 origin-center whitespace-nowrap">
                 可能性 (Likelihood)
               </span>
             </div>
@@ -196,13 +196,13 @@ const RiskMatrixDashboard = () => {
                             title={`嚴重度 Level ${severityVal} ✕ 可能性 Level ${likelihoodVal}\n判定: ${style.label}\n落入場景數: ${count}`}
                           >
                             {/* 左上角標記風險等級 R1-R5 */}
-                            <span className="absolute top-1 left-1.5 text-[10px] font-bold opacity-60">
+                            <span className="absolute top-1 left-1.5 text-xs font-black opacity-60">
                               {acceptability}
                             </span>
                             
-                            <span className="text-3xl font-black">{count > 0 ? count : ''}</span>
+                            <span className="text-4xl font-black">{count > 0 ? count : ''}</span>
                             {count > 0 && (
-                              <span className="text-[10px] font-semibold opacity-70 mt-0.5">場景</span>
+                              <span className="text-xs font-bold opacity-70 mt-0.5">場景</span>
                             )}
                             
                             {/* 格子懸浮提示 */}
@@ -216,7 +216,7 @@ const RiskMatrixDashboard = () => {
               </div>
 
               {/* 橫軸 Severity 等級標示 */}
-              <div className="grid grid-cols-5 gap-1.5 mt-3 text-center text-sm font-semibold text-gray-500 dark:text-gray-400 select-none">
+              <div className="grid grid-cols-5 gap-1.5 mt-3 text-center text-base font-bold text-gray-500 dark:text-gray-400 select-none">
                 {severityLevels.map(s => (
                   <div key={s.level} className="truncate px-1" title={`Level ${s.level}: ${s.label}`}>
                     L-{s.level} {s.label}
@@ -224,13 +224,13 @@ const RiskMatrixDashboard = () => {
                 ))}
               </div>
 
-              <div className="text-center mt-3 text-sm font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest select-none">
+              <div className="text-center mt-3 text-base font-extrabold text-gray-400 dark:text-gray-500 uppercase tracking-widest select-none">
                 嚴重度 (Severity)
               </div>
             </div>
             
             {/* 縱軸 Likelihood 等級提示 */}
-            <div className="w-32 flex flex-col justify-around text-right text-sm font-semibold text-gray-500 dark:text-gray-400 select-none pl-2">
+            <div className="w-40 flex flex-col justify-around text-right text-base font-bold text-gray-500 dark:text-gray-400 select-none pl-2">
               {[5, 4, 3, 2, 1].map(lVal => {
                 const lLevel = likelihoodLevels.find(l => l.level === lVal);
                 return (
@@ -245,27 +245,27 @@ const RiskMatrixDashboard = () => {
 
         {/* 右側：判定說明 */}
         <div className="bg-white/70 dark:bg-slate-900/70 border border-gray-200 dark:border-slate-800 backdrop-blur-md rounded-xl p-6 shadow-sm flex flex-col space-y-5">
-          <h3 className="text-base font-bold text-gray-700 dark:text-gray-300">
+          <h3 className="text-xl font-bold text-gray-700 dark:text-gray-300">
             風險判定標準說明
           </h3>
 
-          <div className="space-y-4 text-sm">
+          <div className="space-y-4 text-base">
             <div className="p-4 bg-rose-500/10 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/40 rounded-lg">
-              <div className="flex items-center gap-2 font-bold text-base text-rose-700 dark:text-rose-400">
+              <div className="flex items-center gap-2 font-bold text-lg text-rose-700 dark:text-rose-400">
                 <XCircle size={18} />
                 <span>不可接受風險 (R3 - R5)</span>
               </div>
-              <p className="text-sm text-gray-600 dark:text-gray-300 mt-2 leading-relaxed">
-                在鐵路營運安全體系中屬於**未達安全容許界限**之高風險區域。必須立即實施有效之獨立保護層 (IPL) 進行減險控制，或透過技術與管理手段降低危害發生之頻率，直到其風險等級降至可接受區域為止。
+              <p className="text-base text-gray-600 dark:text-gray-300 mt-2 leading-relaxed">
+                在鐵路營運安全體系中屬於**未達安全容許界限**之高風險區域。必須立即實施有效之獨立保護層 (IPL) 進行減險控制，或透過技術與 management 手段降低危害發生之頻率，直到其風險等級降至可接受區域為止。
               </p>
             </div>
 
             <div className="p-4 bg-emerald-500/10 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/40 rounded-lg">
-              <div className="flex items-center gap-2 font-bold text-base text-emerald-700 dark:text-emerald-400">
+              <div className="flex items-center gap-2 font-bold text-lg text-emerald-700 dark:text-emerald-400">
                 <CheckCircle size={18} />
                 <span>可接受風險 (R1 - R2)</span>
               </div>
-              <p className="text-sm text-gray-600 dark:text-gray-300 mt-2 leading-relaxed">
+              <p className="text-base text-gray-600 dark:text-gray-300 mt-2 leading-relaxed">
                 屬於鐵路營運**符合安全標準**之低風險區域。目前的防護體系與營運控制措施已合規且足夠，只需進行例行設備維護保養與定期合規性稽核，確保現有屏障功能完整與有效性即可。
               </p>
             </div>
@@ -277,17 +277,17 @@ const RiskMatrixDashboard = () => {
       <div className="bg-white/70 dark:bg-slate-900/70 border border-gray-200 dark:border-slate-800 backdrop-blur-md rounded-xl shadow-sm p-6 transition-all duration-300">
         <div className="flex justify-between items-center mb-4">
           <div>
-            <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300">
+            <h3 className="text-base font-extrabold text-gray-800 dark:text-gray-200">
               {selectedCell 
                 ? `篩選場景：嚴重度 L-${selectedCell.severity} ✕ 可能性 L-${selectedCell.likelihood}`
                 : '所有風險場景路徑'
               }
-              <span className="ml-2 font-mono text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 px-2 py-0.5 rounded-full font-bold">
+              <span className="ml-2 font-mono text-sm text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 px-2.5 py-0.5 rounded-full font-bold">
                 {filteredScenarios.length}
               </span>
             </h3>
             {selectedCell && (
-              <p className="text-xs text-gray-450 dark:text-gray-400 mt-1">
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1.5 font-medium">
                 判定：{getAcceptabilityStyle(matrix[selectedCell.severity - 1][selectedCell.likelihood - 1], false).label}
               </p>
             )}
@@ -324,49 +324,49 @@ const RiskMatrixDashboard = () => {
                   <div className="space-y-2">
                     <div className="flex justify-between items-center">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded font-bold text-xs">
+                        <span className="bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded font-bold text-[15px]">
                           {tCode}
                         </span>
-                        <span className="text-gray-400 text-xs">➔</span>
-                        <span className="bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-300 px-1.5 py-0.5 rounded font-bold text-xs">
+                        <span className="text-gray-400 text-[15px]">➔</span>
+                        <span className="bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-300 px-1.5 py-0.5 rounded font-bold text-[15px]">
                           {cCode}
                         </span>
                       </div>
-                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${style.badge}`}>
+                      <span className={`text-[15px] font-bold px-2 py-0.5 rounded-full ${style.badge}`}>
                         {isAcceptable ? '可接受' : '不可接受'} ({acceptability})
                       </span>
                     </div>
 
-                    <div className="text-sm leading-relaxed space-y-1">
-                      <div className="font-bold text-gray-800 dark:text-gray-200">
+                    <div className="text-base leading-relaxed space-y-1">
+                      <div className="font-bold text-[17px] text-gray-800 dark:text-gray-200">
                         威脅：{threatNode?.data?.label || '未命名威脅'}
                       </div>
-                      <div className="text-gray-600 dark:text-gray-300 mt-0.5">
+                      <div className="text-[16px] text-gray-600 dark:text-gray-300 mt-0.5">
                         後果：{consequenceNode?.data?.label || '未命名後果'}
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap justify-between items-end border-t border-gray-100 dark:border-slate-800/80 pt-2 text-xs gap-2">
-                    <div className="flex flex-col gap-1 text-gray-400 dark:text-gray-500">
+                  <div className="flex flex-wrap justify-between items-end border-t border-gray-100 dark:border-slate-800/80 pt-2 text-[15px] gap-2">
+                    <div className="flex flex-col gap-1 text-gray-500 dark:text-gray-450">
                       <div>
-                        嚴重度: <span className="font-bold text-gray-700 dark:text-gray-300">L-{score?.severity_level || 3}</span>
+                        嚴重度: <span className="font-bold text-gray-850 dark:text-gray-300">L-{score?.severity_level || 3}</span>
                       </div>
                       <div>
                         {viewMode === 'initial' ? '初始可能性' : '殘餘可能性'}:{' '}
-                        <span className="font-bold text-gray-700 dark:text-gray-300">L-{score?.likelihood_level || 3}</span>
+                        <span className="font-bold text-gray-850 dark:text-gray-300">L-{score?.likelihood_level || 3}</span>
                       </div>
                     </div>
-                    <div className="text-gray-400 dark:text-gray-500">
+                    <div className="text-gray-500 dark:text-gray-450">
                       IPL 數量:{' '}
-                      <span className="font-bold text-gray-700 dark:text-gray-300">
+                      <span className="font-bold text-gray-850 dark:text-gray-300">
                         {result?.ipl_count || 0}
                       </span>
                     </div>
                     
                     <button
                       onClick={() => handleJumpToCanvas(path.threat_node_id)}
-                      className="inline-flex items-center gap-1 bg-white hover:bg-blue-50 dark:bg-slate-800 dark:hover:bg-blue-950/30 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-2.5 py-1.5 rounded-md border border-gray-200 dark:border-slate-700/60 transition-all font-semibold text-xs"
+                      className="inline-flex items-center gap-1 bg-white hover:bg-blue-50 dark:bg-slate-800 dark:hover:bg-blue-950/30 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-2.5 py-1.5 rounded-md border border-gray-200 dark:border-slate-700/60 transition-all font-semibold text-sm"
                     >
                       <Compass size={12} />
                       <span>定位畫布</span>
