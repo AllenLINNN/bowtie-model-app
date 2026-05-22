@@ -4,6 +4,8 @@ import { format } from 'date-fns';
 import { FolderOpen, Plus, Trash2, ArchiveRestore, Archive, CheckCircle2, AlertTriangle, Search, FileJson } from 'lucide-react';
 import toast from 'react-hot-toast';
 
+import { BowtieNode } from '../types';
+
 const Dashboard = () => {
   const { projects, createProject, openProject, deleteProject, restoreProject, permanentlyDeleteProject, importProjectJSON } = useStore();
   const [newProjectName, setNewProjectName] = useState('');
@@ -76,7 +78,7 @@ const Dashboard = () => {
     setConfirmDeleteId(null);
   };
 
-  const getNodeStats = (nodes: any[]) => {
+  const getNodeStats = (nodes: BowtieNode[]) => {
     const stats = {
       hazard: 0,
       topEvent: 0,

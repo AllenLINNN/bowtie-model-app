@@ -1,4 +1,5 @@
 import { Edge, Node } from '@xyflow/react';
+import { LopaAnalysisConfig, ConsequenceCategory } from './lopa';
 
 export type NodeType = 'hazard' | 'top_event' | 'threat' | 'consequence' | 'preventive_barrier' | 'mitigative_barrier';
 
@@ -18,6 +19,11 @@ export interface EntityData {
   effectiveness?: string;
   owner?: string;
   barrier_type?: 'behavioral' | 'socio-technical' | 'active-hardware' | 'continuous-hardware' | 'passive-hardware' | 'organizational' | 'other';
+  semi_quant_likelihood?: 1 | 2 | 3 | 4 | 5;
+  semi_quant_severity?: 1 | 2 | 3 | 4 | 5;
+  consequence_category?: ConsequenceCategory;
+  default_pfd?: number;
+  default_is_ipl?: boolean;
   [key: string]: any;
 }
 
@@ -48,4 +54,6 @@ export interface Project {
   nodes: BowtieNode[];
   edges: Edge[];
   archived?: boolean;
+  analysisConfig?: LopaAnalysisConfig;
 }
+

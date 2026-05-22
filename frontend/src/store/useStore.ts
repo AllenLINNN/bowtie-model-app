@@ -13,12 +13,52 @@ import {
 } from '@xyflow/react';
 import localforage from 'localforage';
 import { BowtieNode, Project, LibraryItem, NodeType } from '../types';
+import { LopaAnalysisConfig, RiskCriteria, ScenarioPath } from '../types/lopa';
 import { v4 as uuidv4 } from 'uuid';
 import toast from 'react-hot-toast';
 
 localforage.config({
   name: 'BowtieApp',
   storeName: 'bowtie_data'
+});
+
+const defaultRiskCriteria = (): RiskCriteria => ({
+  id: uuidv4(),
+  name: '預設風險目標與矩陣定義',
+  tmel_fatality: 1e-4,          // 致命事故 TMEL 上限：10^-4 次/年
+  tmel_serious_injury: 1e-3,   // 重傷 TMEL 上限：10^-3 次/年
+  tmel_minor_injury: 1e-2,     // 輕傷 TMEL 上限：10^-2 次/年
+  tmel_property_damage: 1e-3,  // 財損 TMEL 上限：10^-3 次/年
+  risk_matrix_config: {
+    severity_levels: [
+      { level: 1, label: '可忽略', description: '無人員受傷，財產損失極低' },
+      { level: 2, label: '輕微', description: '人員輕傷，小規模財物損失' },
+      { level: 3, label: '中等', description: '人員受傷住院，中等財產損失' },
+      { level: 4, label: '嚴重', description: '人員重傷，重大財產與營運損失' },
+      { level: 5, label: '災難性', description: '人員死亡，災難性毀滅損失' }
+    ],
+    likelihood_levels: [
+      { level: 1, label: '極不可能', description: '年頻率 <= 1e-5，幾乎不曾發生' },
+      { level: 2, label: '不可能', description: '年頻率 1e-4 到 1e-5，罕見發生' },
+      { level: 3, label: '可能', description: '年頻率 1e-3 到 1e-4，偶爾發生' },
+      { level: 4, label: '極可能', description: '年頻率 1e-2 到 1e-3，經常發生' },
+      { level: 5, label: '幾乎確定', description: '年頻率 >= 1e-1，持續發生' }
+    ],
+    acceptability_matrix: [
+      // 橫軸為 Severity (1-5)，縱軸為 Likelihood (1-5)
+      // 對應的二維數組，這裡採用 [severity - 1][likelihood - 1] 結構映射
+      // row 0: Severity 1 (可忽略)
+      ['acceptable', 'acceptable', 'acceptable', 'acceptable', 'alarp'],
+      // row 1: Severity 2 (輕微)
+      ['acceptable', 'acceptable', 'acceptable', 'alarp', 'unacceptable'],
+      // row 2: Severity 3 (中等)
+      ['acceptable', 'acceptable', 'alarp', 'unacceptable', 'unacceptable'],
+      // row 3: Severity 4 (嚴重)
+      ['acceptable', 'alarp', 'unacceptable', 'unacceptable', 'unacceptable'],
+      // row 4: Severity 5 (災難性)
+      ['alarp', 'unacceptable', 'unacceptable', 'unacceptable', 'unacceptable']
+    ]
+  }
 });
 
 interface AppState {
@@ -40,6 +80,7 @@ interface AppState {
   // Active Project State (mirrors the active project's nodes/edges for React Flow)
   nodes: BowtieNode[];
   edges: Edge[];
+  analysisConfig: LopaAnalysisConfig | null;
 
   // History State for Undo/Redo
   pastStates: { nodes: BowtieNode[], edges: Edge[] }[];
@@ -83,6 +124,14 @@ interface AppState {
   importJSON: (file: File) => Promise<void>;
   exportProjectJSON: (projectId: string) => void;
   importProjectJSON: (file: File) => Promise<void>;
+
+  // LOPA Actions
+  initLopaConfig: () => void;
+  updateLopaConfig: (newData: Partial<LopaAnalysisConfig>) => void;
+  updateRiskCriteria: (newData: Partial<RiskCriteria>) => void;
+  addScenarioPath: (path: ScenarioPath) => void;
+  updateScenarioPath: (pathId: string, newData: Partial<ScenarioPath>) => void;
+  removeScenarioPath: (pathId: string) => void;
 }
 
 export const useStore = create<AppState>((set, get) => ({
@@ -101,6 +150,7 @@ export const useStore = create<AppState>((set, get) => ({
   toggleMiniMap: () => set((state) => ({ isMiniMapOpen: !state.isMiniMapOpen })),
   nodes: [],
   edges: [],
+  analysisConfig: null,
   pastStates: [],
   futureStates: [],
 
@@ -180,15 +230,15 @@ export const useStore = create<AppState>((set, get) => ({
   },
 
   saveData: async () => {
-    // Before saving global data, ensure the active project's nodes/edges are synced back to the projects array
-    const { activeProjectId, nodes, edges, projects, library, counters } = get();
+    // Before saving global data, ensure the active project's nodes/edges/analysisConfig are synced back to the projects array
+    const { activeProjectId, nodes, edges, analysisConfig, projects, library, counters } = get();
     
     let updatedProjects = projects;
     if (activeProjectId) {
       const now = Date.now();
       updatedProjects = projects.map(p => 
         p.id === activeProjectId 
-          ? { ...p, nodes, edges, last_modified: now }
+          ? { ...p, nodes, edges, analysisConfig: analysisConfig || undefined, last_modified: now }
           : p
       );
       set({ projects: updatedProjects }); // Update state implicitly
@@ -241,7 +291,7 @@ export const useStore = create<AppState>((set, get) => ({
     if (!id) {
       // Close project and go to dashboard
       get().saveData().then(() => {
-        set({ activeProjectId: null, nodes: [], edges: [], pastStates: [], futureStates: [] });
+        set({ activeProjectId: null, nodes: [], edges: [], pastStates: [], futureStates: [], analysisConfig: null });
       });
       return;
     }
@@ -252,6 +302,7 @@ export const useStore = create<AppState>((set, get) => ({
         activeProjectId: id,
         nodes: project.nodes || [],
         edges: project.edges || [],
+        analysisConfig: project.analysisConfig || null,
         pastStates: [],
         futureStates: []
       });
@@ -468,5 +519,100 @@ export const useStore = create<AppState>((set, get) => ({
       console.error("Failed to parse project JSON file", error);
       toast.error("無效的 JSON 檔案或格式錯誤");
     }
+  },
+
+  // LOPA Actions
+  initLopaConfig: () => {
+    const activeId = get().activeProjectId;
+    if (!activeId) return;
+
+    const newConfig: LopaAnalysisConfig = {
+      id: uuidv4(),
+      version: '0.1.0',
+      created_at: Date.now(),
+      updated_at: Date.now(),
+      riskCriteria: defaultRiskCriteria(),
+      scenarioPaths: []
+    };
+
+    set({ analysisConfig: newConfig });
+    get().saveData();
+  },
+
+  updateLopaConfig: (newData) => {
+    const current = get().analysisConfig;
+    if (!current) return;
+
+    const updated: LopaAnalysisConfig = {
+      ...current,
+      ...newData,
+      updated_at: Date.now()
+    };
+
+    set({ analysisConfig: updated });
+    get().saveData();
+  },
+
+  updateRiskCriteria: (newData) => {
+    const current = get().analysisConfig;
+    if (!current) return;
+
+    const updated: LopaAnalysisConfig = {
+      ...current,
+      riskCriteria: {
+        ...current.riskCriteria,
+        ...newData
+      },
+      updated_at: Date.now()
+    };
+
+    set({ analysisConfig: updated });
+    get().saveData();
+  },
+
+  addScenarioPath: (path) => {
+    const current = get().analysisConfig;
+    if (!current) return;
+
+    const updated: LopaAnalysisConfig = {
+      ...current,
+      scenarioPaths: [...current.scenarioPaths, path],
+      updated_at: Date.now()
+    };
+
+    set({ analysisConfig: updated });
+    get().saveData();
+  },
+
+  updateScenarioPath: (pathId, newData) => {
+    const current = get().analysisConfig;
+    if (!current) return;
+
+    const updated: LopaAnalysisConfig = {
+      ...current,
+      scenarioPaths: current.scenarioPaths.map(p => 
+        p.id === pathId 
+          ? { ...p, ...newData, updated_at: Date.now() } 
+          : p
+      ),
+      updated_at: Date.now()
+    };
+
+    set({ analysisConfig: updated });
+    get().saveData();
+  },
+
+  removeScenarioPath: (pathId) => {
+    const current = get().analysisConfig;
+    if (!current) return;
+
+    const updated: LopaAnalysisConfig = {
+      ...current,
+      scenarioPaths: current.scenarioPaths.filter(p => p.id !== pathId),
+      updated_at: Date.now()
+    };
+
+    set({ analysisConfig: updated });
+    get().saveData();
   }
 }));
