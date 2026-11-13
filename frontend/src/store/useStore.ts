@@ -123,9 +123,14 @@ interface AppState {
   updateNodeData: (nodeId: string, newData: any) => void;
   updateEdgeData: (edgeId: string, newData: any) => void;
 
+  // 在畫布指定位置新增節點（拖放與點擊新增共用）
+  addNodeFromTemplate: (type: NodeType, label: string, position: { x: number; y: number }) => void;
+  addNodeFromLibrary: (libraryId: string, position: { x: number; y: number }) => void;
+
   // Library Actions
   addToLibrary: (item: Omit<LibraryItem, 'id' | 'created_at'>) => string;
   removeFromLibrary: (id: string) => void;
+  restoreLibraryItem: (item: LibraryItem) => void;
 
   // Export / Import
   exportJSON: () => void;
@@ -508,9 +513,45 @@ export const useStore = create<AppState>((set, get) => ({
 
   removeFromLibrary: (id) => {
     set((state) => ({
-      library: state.library.filter(item => item.id !== id)
+      library: state.library.filter(item => item.id !== id),
+      selectedLibraryItemId: state.selectedLibraryItemId === id ? null : state.selectedLibraryItemId
     }));
     get().saveData();
+  },
+
+  restoreLibraryItem: (item) => {
+    if (get().library.some(i => i.id === item.id)) return;
+    set((state) => ({ library: [...state.library, item] }));
+    get().saveData();
+  },
+
+  addNodeFromTemplate: (type, label, position) => {
+    const code = get().generateNextCode(type);
+    const newNode: BowtieNode = {
+      id: uuidv4(),
+      type: 'custom',
+      position,
+      data: { label, type, entityId: uuidv4(), entityData: { code } }
+    };
+    get().setNodes([...get().nodes, newNode]);
+  },
+
+  addNodeFromLibrary: (libraryId, position) => {
+    const libItem = get().library.find(item => item.id === libraryId);
+    if (!libItem) return;
+    const newNode: BowtieNode = {
+      id: uuidv4(),
+      type: 'custom',
+      position,
+      data: {
+        label: libItem.label,
+        type: libItem.type,
+        entityId: uuidv4(),
+        entityData: { ...libItem.entityData },
+        fromLibraryId: libItem.id
+      }
+    };
+    get().setNodes([...get().nodes, newNode]);
   },
 
   exportJSON: () => {
@@ -865,7 +906,7 @@ export const useStore = create<AppState>((set, get) => ({
             frequency_per_year: threatEntityData.frequency_per_year !== undefined ? threatEntityData.frequency_per_year : (oldIE?.frequency_per_year ?? 0.1),
             semi_quant_level: threatEntityData.semi_quant_likelihood !== undefined ? threatEntityData.semi_quant_likelihood : (oldIE?.semi_quant_level ?? 3),
             input_mode: threatEntityData.input_mode !== undefined ? threatEntityData.input_mode : (oldIE?.input_mode ?? 'semi_quantitative'),
-            source: threatEntityData.source !== undefined ? threatEntityData.source : (oldIE?.source ?? '預設工藝安全設定'),
+            source: threatEntityData.source !== undefined ? threatEntityData.source : (oldIE?.source ?? '預設製程安全設定'),
             confidence_level: threatEntityData.confidence_level !== undefined ? threatEntityData.confidence_level : (oldIE?.confidence_level ?? 'medium'),
             reference: threatEntityData.reference !== undefined ? threatEntityData.reference : (oldIE?.reference ?? '')
           };
